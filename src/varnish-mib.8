@@ -1,0 +1,126 @@
+.\" This file is part of Varnish-mib -*- nroff -*-
+.\" Copyright (C) 2014 Sergey Poznyakoff
+.\"
+.\" Varnish-mib is free software; you can redistribute it and/or modify
+.\" it under the terms of the GNU General Public License as published by
+.\" the Free Software Foundation; either version 3, or (at your option)
+.\" any later version.
+.\"
+.\" Varnish-mib is distributed in the hope that it will be useful,
+.\" but WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+.\" GNU General Public License for more details.
+.\"
+.\" You should have received a copy of the GNU General Public License
+.\" along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
+.TH VARNISH-MIB 8 "November 15, 2014" "varnish-mib"
+.SH NAME
+varnish\-mib \- net\-snmp module for obtaining Varnish Cache statistics
+.SH SYNOPSIS
+In \fBsnmpd.conf\fR(5):
+.br
+.B dlmod varnish_mib /usr/lib/snmp/varnish-mib.so
+.SH DESCRIPTION
+Dynamically loadable object module for
+.B net-snmp
+.BR snmpd (8),
+that provides access to Varnish Cache statistics.  The module is
+loaded into
+.B snmpd
+as shown above (actual path can of course differ, depending on how
+the package was configured).
+.PP
+The following OIDs are defined:
+.TP
+.B VARNISH-MIB::clientAcceptedConnections.0
+Number of accepted connections.
+.TP
+.B VARNISH-MIB::clientRequestsReceived.0
+Number of received HTTP requests.
+.TP
+.B VARNISH-MIB::clientCacheHits.0
+Number of cache hits.  A cache hit indicates that an object has been
+delivered to a  client without fetching it from a backend server.
+.TP
+.B VARNISH-MIB::clientCacheHitsPass.0
+Number of hits for pass.  A cache hit for pass indicates that Varnish
+passes the request to the backend and this decision itself has been cached. 
+.TP
+.B VARNISH-MIB::clientCacheMisses.0
+Number of misses.  A cache miss indicates the object was fetched from
+the backend before delivering it to the client.
+.TP
+.B VARNISH-MIB::backendConnSuccess.0
+Number of successful connections to the backend.
+.TP
+.B VARNISH-MIB::backendConnNotAttempted.0
+Number of backend connections not attempted, because of the unhealthy
+status of the backend.
+.TP
+.B VARNISH-MIB::backendConnToMany.0
+Number of backend connections failed because there were too many
+connections open.
+.TP
+.B VARNISH-MIB::backendConnFailures.0
+Number of failed backend connections.
+.TP
+.B VARNISH-MIB::backendConnReuses.0
+Number of reused backend connections.  This counter is increased
+whenever Varnish reuses a recycled connection.
+.TP
+.B VARNISH-MIB::backendConnRecycled.0
+Number of backend connection recycles.  This counter is increased
+whenever Varnish has keep-alive connection that is put back into
+the pool of connections.  It has not yet been used, but it might be,
+unless the backend closes it.
+.TP
+.B VARNISH-MIB::backendConnUnused.0
+Number of unused backend connections.
+.TP
+.B VARNISH-MIB::totalSessions.0
+Total number of sessions served since the startup.
+.TP
+.B VARNISH-MIB::totalRequests.0
+Total number of requests received since the startup.
+.TP
+.B VARNISH-MIB::totalPipe.0
+Total number of requests piped to the backend.
+.TP
+.B VARNISH-MIB::totalPass.0
+Total number of requests passed to the backend.
+.TP
+.B VARNISH-MIB::totalFetch.0
+Total number of fetches.
+.TP
+.B VARNISH-MIB::totalHeaderBytes.0
+Total request header bytes received.
+.TP
+.B VARNISH-MIB::totalBodyBytes.0
+Total request body bytes received.
+.SH "SEE ALSO"
+.BR snmpd.conf (5),
+.BR snmpd (8),
+.BR varnish (7),
+.BR varnishstat (1).
+.SH AUTHORS
+Sergey Poznyakoff
+.SH "BUG REPORTS"
+Report bugs to <gray@gnu.org>.
+.SH COPYRIGHT
+Copyright \(co 2013-2014 Sergey Poznyakoff
+.br
+.na
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+.br
+.ad
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.\" Local variables:
+.\" eval: (add-hook 'write-file-hooks 'time-stamp)
+.\" time-stamp-start: ".TH [A-Z_][A-Z0-9_.-]* [0-9] \""
+.\" time-stamp-format: "%:B %:d, %:y"
+.\" time-stamp-end: "\""
+.\" time-stamp-line-limit: 20
+.\" end:
+
+

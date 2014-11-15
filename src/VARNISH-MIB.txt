@@ -1,0 +1,237 @@
+VARNISH-MIB DEFINITIONS ::= BEGIN
+
+-- *************************************************************
+-- $Id: VARNISH-MIB.txt,v 1.5 2009/03/07 09:44:10 mhe Exp $
+--
+-- Varnish reverse proxy MIB
+-- by Shared Autonomous sYstems
+--
+-- *************************************************************
+
+IMPORTS
+	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter32
+		FROM SNMPv2-SMI
+	OBJECT-GROUP, MODULE-COMPLIANCE
+		FROM SNMPv2-CONF;
+
+varnishMIB MODULE-IDENTITY
+	LAST-UPDATED "200903050000Z"
+	ORGANIZATION "Shared Autonomous sYstems"
+	CONTACT-INFO "mhe@say.no"
+	DESCRIPTION 
+		"This MIB module defines objects for Varnish reverse web proxy."
+	REVISION "200903050000Z"
+	DESCRIPTION 
+		"Initial version."
+	::= { varnish 0 }
+
+varnish OBJECT IDENTIFIER	::= { enterprises 33043 6 1 }
+client  OBJECT IDENTIFIER	::= { varnish 1 }
+backend OBJECT IDENTIFIER	::= { varnish 2 }
+total   OBJECT IDENTIFIER	::= { varnish 3 }
+
+clientAcceptedConnections OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Client connections accepted"
+	::= { client 1 }
+
+clientRequestsReceived OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Client requests received"
+	::= { client 2 }
+
+clientCacheHits OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Cache hits"
+	::= { client 3 }
+
+clientCacheHitsPass OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Cache hits for pass"
+	::= { client 4 }
+
+clientCacheMisses OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Cache misses"
+	::= { client 5 }
+
+connections OBJECT IDENTIFIER    ::= { backend 1 }
+
+backendConnSuccess OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections success"
+	::= { connections 1 }
+ 
+backendConnNotAttempted OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections not attempted"
+	::= { connections 2 }
+ 
+backendConnToMany OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections too many"
+	::= { connections 3 }
+ 
+backendConnFailures OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections failures"
+	::= { connections 4 }
+ 
+backendConnReuses OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections reuses"
+	::= { connections 5 }
+ 
+backendConnRecycled OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections recycles"
+	::= { connections 6 }
+ 
+backendConnUnused OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Backend connections unused"
+	::= { connections 7 }
+ 
+totalSessions OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total Sessions"
+	::= { total 1 }
+ 
+totalRequests OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total Requests"
+	::= { total 2 }
+ 
+totalPipe OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total pipe"
+	::= { total 3 }
+ 
+totalPass OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total pass"
+	::= { total 4 }
+ 
+totalFetch OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total fetch"
+	::= { total 5 }
+ 
+totalHeaderBytes OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total header bytes"
+	::= { total 6 }
+ 
+totalBodyBytes OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total body bytes"
+	::= { total 7 }
+ 
+--
+-- Groups and Compliance
+--
+varnishConfs  OBJECT IDENTIFIER	::= { varnish 100 }
+varnishGroups OBJECT IDENTIFIER	::= { varnishConfs 1 }
+varnishCompl  OBJECT IDENTIFIER ::= { varnishConfs 2 }
+
+--
+-- Groups
+--
+varnishGroup OBJECT-GROUP
+	OBJECTS {
+                clientAcceptedConnections,
+		clientRequestsReceived,
+		clientCacheHits,
+		clientCacheHitsPass,
+		clientCacheMisses,
+		backendConnSuccess,
+		backendConnNotAttempted,
+		backendConnToMany,
+		backendConnFailures,
+		backendConnReuses,
+		backendConnRecycled,
+		backendConnUnused,
+		totalSessions,
+		totalRequests,
+		totalPipe,
+		totalPass,
+		totalFetch,
+		totalHeaderBytes,
+     		totalBodyBytes}
+
+	STATUS  current
+	DESCRIPTION "Group of Varnish objects"
+	::= { varnishGroups 1 }
+
+--
+-- Compliance
+--
+varnishStandardComplianceV1 MODULE-COMPLIANCE
+	STATUS  current
+	DESCRIPTION
+		"Compliance for an Varnish agent"
+
+	MODULE 
+	MANDATORY-GROUPS {
+		varnishGroup}
+
+	::= { varnishCompl 1 }
+
+END

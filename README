@@ -1,0 +1,66 @@
+Varnish-mib README
+Copyright (C) 2014 Sergey Poznyakoff
+See the end of file for copying conditions.
+
+* Introduction
+
+This file contains brief information about configuring, testing
+and using vmod-binlog. It is *not* intended as a replacement
+for the documentation, and is provided as a brief reference only.
+For a detailed documentation, please see the varnish-mib (8)
+manpage.
+
+* Overview
+
+Varnish-mib is a dynamically loadable object module for net-snmp
+snmpd, that provides access to Varnish Cache statistics.
+
+* Installation
+
+In order to compile the package you need to have Net-snmp and Varnish
+installed.  Only Varnish 4.x is supported.  The installation sequence
+is as usual:
+
+  ./configure [options]
+  make
+  make install
+
+(the last step normally requires root privileges).  For generic
+options to configure, please see the file INSTALL.  Package-specific
+options are:
+
+** --with-dlmoddir=DIR
+
+Install varnish_mod.so in DIR.  By default it is installed in
+$PREFIX/lib/snmp, where $PREFIX stands for the installation prefix.
+
+** --with-mibdir=DIR
+
+Install MIBs (the file VARNISH-MIB.txt in DIR.  By default it is
+installed in $prefix/share/snmp.
+
+* Bug reporting
+
+Send bug reports and suggestions to <gray@gnu.org>
+
+
+* Copyright information:
+
+Copyright (C) 2014 Sergey Poznyakoff
+
+   Permission is granted to anyone to make or distribute verbatim copies
+   of this document as received, in any medium, provided that the
+   copyright notice and this permission notice are preserved,
+   thus giving the recipient permission to redistribute in turn.
+
+   Permission is granted to distribute modified versions
+   of this document, or of portions of it,
+   under the above conditions, provided also that they
+   carry prominent notices stating who last changed them.
+
+
+Local Variables:
+mode: outline
+paragraph-separate: "[ 	]*$"
+version-control: never
+End:
