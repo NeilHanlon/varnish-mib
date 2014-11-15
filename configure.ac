@@ -1,18 +1,18 @@
-# This file is part of varnish-mib -*- autoconf -*-
-# Copyright (C) 2013-2014 Sergey Poznyakoff
+# This file is part of Varnish-mib -*- autoconf -*-
+# Copyright (C) 2014 Sergey Poznyakoff
 #
-# varnish-mib is free software; you can redistribute it and/or modify
+# Varnish-mib is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
 #
-# varnish-mib is distributed in the hope that it will be useful,
+# Varnish-mib is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
+# along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ(2.69)
 AC_INIT([varnish-mib], 0.1, [gray@gnu.org])
@@ -23,7 +23,7 @@ AC_CONFIG_MACRO_DIR([m4])
 
 AC_CANONICAL_SYSTEM
 AC_LANG(C)
-AM_INIT_AUTOMAKE([foreign tar-ustar])
+AM_INIT_AUTOMAKE([gnu tar-ustar])
 
 AC_GNU_SOURCE
 AC_PROG_CC
