@@ -70,7 +70,7 @@ $vars{'varnish_translate'} = sub {
 	backendConnReuses         => 'backend_reuse',
 	backendConnRecycled       => 'backend_recycle',
 	backendConnUnused         => 'backend_toolate',
-	totalSessions             => 's_sess ',
+	totalSessions             => 's_sess',
 	totalRequests             => 's_req ',
 	totalPipe                 => 's_pipe',
 	totalPass                 => 's_pass',
@@ -146,13 +146,7 @@ init_$modulename(void)
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("$i", handle_$i,
                                ${i}_oid, OID_LENGTH(${i}_oid),
-    @if !$i.settable@
-                               HANDLER_CAN_RONLY
-    @end@
-    @if $i.settable@
-                               HANDLER_CAN_RWRITE
-    @end@
-        ));
+                               HANDLER_CAN_RONLY));
   @end@
     varnish_snmp_init();
 }

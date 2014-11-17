@@ -26,7 +26,7 @@ BUILT_SOURCES = \
 varnish_mib.c: varnish_mib.mib2c
 
 .mib2c.c:
-	MIBDIRS=${abs_srcdir}:${NET_SNMP_MIBDIRS} MIBS="+VARNISH-MIB" \
+	MIBDIRS=${top_srcdir}/src:${NET_SNMP_MIBDIRS} MIBS="+VARNISH-MIB" \
 	 mib2c -c $< -f $@ varnish
 
 #NET_SNMP_INCLUDES = `$(NET_SNMP_CONFIG) --cflags`
