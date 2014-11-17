@@ -116,19 +116,26 @@ handle_$i(netsnmp_mib_handler *handler,
     &{$vars{'varnish_translate'}}($vars{'i'});
   @endperl@
     if (reqinfo->mode == MODE_GET) {
-	struct VSC_C_main const *st = VSC_Main(vd, NULL);
+	struct VSC_C_main const *st;
+
+	if (VSM_Abandoned(vd)) {
+	     VSM_Close(vd);
+	     VSM_Open(vd);
+	}
+
+	st = VSC_Main(vd, NULL);
 	if (!st)
 	    return SNMP_ERR_NOSUCHNAME;
 	snmp_set_var_typed_value(requests->requestvb, $i.type,
 				 &st->$varnish_member,
 				 sizeof(st->$varnish_member));
     } else {
-      snmp_log(LOG_ERR, "unknown mode (%d) in handle_${i}\n",
-	       reqinfo->mode );
-      return SNMP_ERR_GENERR;
+        snmp_log(LOG_ERR, "unknown mode (%d) in handle_${i}\n",
+	         reqinfo->mode );
+        return SNMP_ERR_GENERR;
     }
 
-  return SNMP_ERR_NOERROR;
+    return SNMP_ERR_NOERROR;
 }
 @end@
 
@@ -140,7 +147,7 @@ init_$modulename(void)
     const oid ${i}_oid[] = { $i.commaoid };
   @end@
 
-  DEBUGMSGTL(("$name", "Initializing\n"));
+  DEBUGMSGTL(("$modulename", "Initializing\n"));
 
   @foreach $i scalar@
     netsnmp_register_scalar(
