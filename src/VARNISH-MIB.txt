@@ -70,6 +70,14 @@ clientCacheMisses OBJECT-TYPE
 		"Cache misses"
 	::= { client 5 }
 
+clientBan OBJECT-TYPE
+	SYNTAX	OCTET STRING (SIZE(0..1024))
+	MAX-ACCESS  read-write
+	STATUS      current
+	DESCRIPTION
+		"FIXME"
+	::= { client 6 }
+	
 connections OBJECT IDENTIFIER    ::= { backend 1 }
 
 backendConnSuccess OBJECT-TYPE
@@ -201,6 +209,7 @@ varnishGroup OBJECT-GROUP
 		clientCacheHits,
 		clientCacheHitsPass,
 		clientCacheMisses,
+		clientBan,
 		backendConnSuccess,
 		backendConnNotAttempted,
 		backendConnToMany,

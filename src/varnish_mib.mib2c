@@ -26,16 +26,7 @@
 @open ${name}@
 /* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
 
-#include <config.h>
-#include <stdlib.h>
-#include <stdint.h>
-
-#include <vapi/vsc.h>
-#include <vapi/vsm.h>
-
-#include <net-snmp/net-snmp-config.h>
-#include <net-snmp/net-snmp-includes.h>
-#include <net-snmp/agent/net-snmp-agent-includes.h>
+#include "varnish_mib.h"
 
 static struct VSM_data *vd;
 
@@ -58,25 +49,27 @@ varnish_snmp_deinit(void)
 $vars{'varnish_translate'} = sub {
     my $name = shift;
     my %trans = (
-	clientAcceptedConnections => 'sess_conn',
-	clientRequestsReceived    => 'client_req',
-	clientCacheHits           => 'cache_hit',
-	clientCacheHitsPass       => 'cache_hitpass',
-	clientCacheMisses         => 'cache_miss',
-	backendConnSuccess        => 'backend_conn',
-	backendConnNotAttempted   => 'backend_unhealthy',
-	backendConnToMany         => 'backend_busy ',
-	backendConnFailures       => 'backend_fail',
-	backendConnReuses         => 'backend_reuse',
-	backendConnRecycled       => 'backend_recycle',
-	backendConnUnused         => 'backend_toolate',
-	totalSessions             => 's_sess',
-	totalRequests             => 's_req ',
-	totalPipe                 => 's_pipe',
-	totalPass                 => 's_pass',
-	totalFetch                => 's_fetch',
-	totalHeaderBytes          => 's_req_hdrbytes',
-	totalBodyBytes            => 's_req_bodybytes'
+	clientAcceptedConnections => [ 'MAIN', 'sess_conn' ],
+	clientRequestsReceived    => [ 'MAIN', 'client_req' ],
+	clientCacheHits           => [ 'MAIN', 'cache_hit' ],
+	clientCacheHitsPass       => [ 'MAIN', 'cache_hitpass' ],
+	clientCacheMisses         => [ 'MAIN', 'cache_miss' ],
+	clientBan                 => [ 'STRING', '',
+				       { varnish_set_action => 'varnish_ban' }  ],
+	backendConnSuccess        => [ 'MAIN', 'backend_conn' ],
+	backendConnNotAttempted   => [ 'MAIN', 'backend_unhealthy' ],
+	backendConnToMany         => [ 'MAIN', 'backend_busy' ],
+	backendConnFailures       => [ 'MAIN', 'backend_fail' ],
+	backendConnReuses         => [ 'MAIN', 'backend_reuse' ],
+	backendConnRecycled       => [ 'MAIN', 'backend_recycle' ],
+	backendConnUnused         => [ 'MAIN', 'backend_toolate' ],
+	totalSessions             => [ 'MAIN', 's_sess' ],
+	totalRequests             => [ 'MAIN', 's_req' ],
+	totalPipe                 => [ 'MAIN', 's_pipe' ],
+	totalPass                 => [ 'MAIN', 's_pass' ],
+	totalFetch                => [ 'MAIN', 's_fetch' ],
+	totalHeaderBytes          => [ 'MAIN', 's_req_hdrbytes' ],
+	totalBodyBytes            => [ 'MAIN', 's_req_bodybytes' ]
 	);
 
     my $r = $trans{$name};
@@ -84,7 +77,16 @@ $vars{'varnish_translate'} = sub {
 	print STDERR "no translation for $name!\n";
 	exit(1);
     }
-    $vars{'varnish_member'} = $r;
+
+    $vars{'varnish_type'} = $r->[0];
+    $vars{'varnish_member'} = $r->[1];
+    my $setkw = qw(varnish_set_reserve2 varnish_set_free varnish_set_action
+		   varnish_set_commit varnish_set_undo);
+    if ($#{$r} == 2) {
+	@vars{keys %{$r->[2]}} = values %{$r->[2]};
+    } else {
+	delete $vars{$setkw};
+    }
     return 0;
 };
 
@@ -110,31 +112,106 @@ handle_$i(netsnmp_mib_handler *handler,
                           netsnmp_agent_request_info   *reqinfo,
                           netsnmp_request_info         *requests)
 {
-    uint32_t val;
+  @if $i.settable@
+    int ret;
+  @end@
     
   @startperl@
     &{$vars{'varnish_translate'}}($vars{'i'});
   @endperl@
-    if (reqinfo->mode == MODE_GET) {
-	struct VSC_C_main const *st;
-
-	if (VSM_Abandoned(vd)) {
-	     VSM_Close(vd);
-	     VSM_Open(vd);
-	}
-
-	st = VSC_Main(vd, NULL);
+      
+    if (VSM_Abandoned(vd)) {
+        DEBUGMSGTL(("$modulename", "reopening vd\n"));
+	VSM_Close(vd);
+	VSM_Open(vd);
+    }
+  
+    switch(reqinfo->mode) {
+    case MODE_GET:
+  @if $varnish_type eq 'MAIN'@
+    {			    
+        struct VSC_C_main const *st = VSC_Main(vd, NULL);
 	if (!st)
 	    return SNMP_ERR_NOSUCHNAME;
 	snmp_set_var_typed_value(requests->requestvb, $i.type,
 				 &st->$varnish_member,
 				 sizeof(st->$varnish_member));
-    } else {
-        snmp_log(LOG_ERR, "unknown mode (%d) in handle_${i}\n",
-	         reqinfo->mode );
-        return SNMP_ERR_GENERR;
     }
+  @elsif $varnish_type eq 'STRING'@
+    {
+	const char *s = "$varnish_member";
+	snmp_set_var_typed_value(requests->requestvb, $i.type,
+				 s, strlen(s));
+    }
+  @else@
+    @printf "unrecognized type %s for %s" $varnish_type $i@
+  @end@
+        break;
 
+  @if $i.settable@
+    /*
+     * SET REQUEST
+     *
+     * multiple states in the transaction.  See:
+     * http://www.net-snmp.org/tutorial-5/toolkit/mib_module/set-actions.jpg
+     */
+    case MODE_SET_RESERVE1:
+	/* or you could use netsnmp_check_vb_type_and_size instead */
+	ret = netsnmp_check_vb_type(requests->requestvb, $i.type);
+        if (ret != SNMP_ERR_NOERROR)
+	    netsnmp_set_request_error(reqinfo, requests, ret);
+	break;
+
+    case MODE_SET_RESERVE2:
+    @if $varnish_set_reserve2 ne ''@
+        if ($varnish_set_reserve2 (reqinfo, requests, vd)) {
+	    netsnmp_set_request_error(reqinfo, requests,
+				      SNMP_ERR_RESOURCEUNAVAILABLE);
+	}
+    @end@
+	break;
+
+    case MODE_SET_FREE:
+    @if $varnish_set_free ne ''@
+	/* XXX: free resources allocated in RESERVE1 and/or
+	   RESERVE2.  Something failed somewhere, and the states
+	   below won't be called. */
+        $varnish_set_free(reqinfo, requests, vd);
+    @end@
+	break;
+
+    case MODE_SET_ACTION:
+    @if $varnish_set_action ne ''@
+	/* XXX: perform the value change here */
+        ret = $varnish_set_action(reqinfo, requests, vd);
+        if (ret != SNMP_ERR_NOERROR)
+	    netsnmp_set_request_error(reqinfo, requests, ret);
+    @end@
+	break;
+
+    case MODE_SET_COMMIT:
+    @if $varnish_set_commit ne ''@
+	/* XXX: delete temporary storage */
+        if ($varnish_set_commit(reqinfo, requests, vd))
+	    netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_COMMITFAILED);
+    @end@
+	break;
+
+    case MODE_SET_UNDO:
+    @if $varnish_set_undo ne ''@
+	/* XXX: UNDO and return to previous value for the object */
+        if ($varnish_set_undo(reqinfo, requests, vd))
+	    netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_UNDOFAILED);
+    @end@
+	break;
+  @end@
+
+    default:
+	/* we should never get here, so this is a really bad error */
+	snmp_log(LOG_ERR, "unknown mode (%d) in handle_${i}\n", reqinfo->mode );
+	return SNMP_ERR_GENERR;
+    }
+    
     return SNMP_ERR_NOERROR;
 }
 @end@
@@ -153,7 +230,13 @@ init_$modulename(void)
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("$i", handle_$i,
                                ${i}_oid, OID_LENGTH(${i}_oid),
-                               HANDLER_CAN_RONLY));
+    @if !$i.settable@
+                               HANDLER_CAN_RONLY
+    @end@
+    @if $i.settable@
+                               HANDLER_CAN_RWRITE
+    @end@
+        ));
   @end@
     varnish_snmp_init();
 }

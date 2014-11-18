@@ -18,7 +18,13 @@ dlmoddir=@DLMODDIR@
 dlmod_LTLIBRARIES = varnish-mib.la
 
 varnish_mib_la_SOURCES = \
- varnish_mib.c
+ auth.c\
+ ban.c\
+ sha256.c\
+ sha256.h\
+ varnish_mib.c\
+ varnish_mib.h\
+ vcli.c
 
 BUILT_SOURCES = \
  varnish_mib.c
