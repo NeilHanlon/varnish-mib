@@ -173,16 +173,15 @@ handle_$i(netsnmp_mib_handler *handler,
 
     case MODE_SET_FREE:
     @if $varnish_set_free ne ''@
-	/* XXX: free resources allocated in RESERVE1 and/or
-	   RESERVE2.  Something failed somewhere, and the states
-	   below won't be called. */
+        # Free resources allocated in RESERVE1 and/or
+	# RESERVE2.  Something failed somewhere, and the states
+	# below won't be called. */
         $varnish_set_free(reqinfo, requests, vd);
     @end@
 	break;
 
     case MODE_SET_ACTION:
     @if $varnish_set_action ne ''@
-	/* XXX: perform the value change here */
         ret = $varnish_set_action(reqinfo, requests, vd);
         if (ret != SNMP_ERR_NOERROR)
 	    netsnmp_set_request_error(reqinfo, requests, ret);
@@ -191,7 +190,7 @@ handle_$i(netsnmp_mib_handler *handler,
 
     case MODE_SET_COMMIT:
     @if $varnish_set_commit ne ''@
-	/* XXX: delete temporary storage */
+	# delete temporary storage
         if ($varnish_set_commit(reqinfo, requests, vd))
 	    netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_COMMITFAILED);
     @end@
@@ -199,7 +198,7 @@ handle_$i(netsnmp_mib_handler *handler,
 
     case MODE_SET_UNDO:
     @if $varnish_set_undo ne ''@
-	/* XXX: UNDO and return to previous value for the object */
+	# UNDO and return to previous value for the object
         if ($varnish_set_undo(reqinfo, requests, vd))
 	    netsnmp_set_request_error(reqinfo, requests, SNMP_ERR_UNDOFAILED);
     @end@
