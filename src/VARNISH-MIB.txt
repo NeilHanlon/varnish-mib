@@ -15,12 +15,12 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "200903050000Z"
+	LAST-UPDATED "201411191038Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "mhe@say.no"
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "200903050000Z"
+	REVISION "201411191038Z"
 	DESCRIPTION 
 		"Initial version."
 	::= { varnish 0 }
@@ -245,3 +245,12 @@ varnishStandardComplianceV1 MODULE-COMPLIANCE
 	::= { varnishCompl 1 }
 
 END
+
+-- Local variables:
+-- eval: (add-hook 'write-file-hooks 'time-stamp)
+-- time-stamp-start: "\\(LAST-UPDATED\\|REVISION\\)  *\""
+-- time-stamp-end: "\""
+-- time-stamp-format: "%:y%:m%:d%:H%:MZ"
+-- time-stamp-line-limit: 25
+-- time-stamp-count: 2
+-- end:
