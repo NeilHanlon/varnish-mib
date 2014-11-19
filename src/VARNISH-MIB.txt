@@ -75,7 +75,8 @@ clientBan OBJECT-TYPE
 	MAX-ACCESS  read-write
 	STATUS      current
 	DESCRIPTION
-		"FIXME"
+		"When set, invalidates the cache using the supplied value as
+		 argument to ban.  When read, returns an empty string."
 	::= { client 6 }
 	
 connections OBJECT IDENTIFIER    ::= { backend 1 }
