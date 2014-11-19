@@ -27,7 +27,7 @@
 
 #define ISSPACE(c) ((c)==' '||(c)=='\t'||(c)=='\n')
 
-unsigned long vcli_timeout = 500;
+unsigned long vcli_timeout = 5; /* FIXME */
 
 #define VCLI_INIT_ALLOC 16
 
