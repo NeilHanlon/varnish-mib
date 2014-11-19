@@ -29,7 +29,7 @@ varnish_mib_la_SOURCES = \
 BUILT_SOURCES = \
  varnish_mib.c
 
-varnish_mib.c: varnish_mib.mib2c
+varnish_mib.c: varnish_mib.mib2c VARNISH-MIB.txt
 
 .mib2c.c:
 	MIBDIRS=${top_srcdir}/src:${NET_SNMP_MIBDIRS} MIBS="+VARNISH-MIB" \

@@ -9,18 +9,18 @@ VARNISH-MIB DEFINITIONS ::= BEGIN
 -- *************************************************************
 
 IMPORTS
-	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter32
+	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter64
 		FROM SNMPv2-SMI
 	OBJECT-GROUP, MODULE-COMPLIANCE
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411191038Z"
+	LAST-UPDATED "201411191934Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "mhe@say.no"
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411191038Z"
+	REVISION "201411191934Z"
 	DESCRIPTION 
 		"Initial version."
 	::= { varnish 0 }
@@ -31,7 +31,7 @@ backend OBJECT IDENTIFIER	::= { varnish 2 }
 total   OBJECT IDENTIFIER	::= { varnish 3 }
 
 clientAcceptedConnections OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -39,7 +39,7 @@ clientAcceptedConnections OBJECT-TYPE
 	::= { client 1 }
 
 clientRequestsReceived OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -47,7 +47,7 @@ clientRequestsReceived OBJECT-TYPE
 	::= { client 2 }
 
 clientCacheHits OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -55,7 +55,7 @@ clientCacheHits OBJECT-TYPE
 	::= { client 3 }
 
 clientCacheHitsPass OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -63,7 +63,7 @@ clientCacheHitsPass OBJECT-TYPE
 	::= { client 4 }
 
 clientCacheMisses OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -82,7 +82,7 @@ clientBan OBJECT-TYPE
 connections OBJECT IDENTIFIER    ::= { backend 1 }
 
 backendConnSuccess OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -90,7 +90,7 @@ backendConnSuccess OBJECT-TYPE
 	::= { connections 1 }
  
 backendConnNotAttempted OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -98,7 +98,7 @@ backendConnNotAttempted OBJECT-TYPE
 	::= { connections 2 }
  
 backendConnToMany OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -106,7 +106,7 @@ backendConnToMany OBJECT-TYPE
 	::= { connections 3 }
  
 backendConnFailures OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -114,7 +114,7 @@ backendConnFailures OBJECT-TYPE
 	::= { connections 4 }
  
 backendConnReuses OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -122,7 +122,7 @@ backendConnReuses OBJECT-TYPE
 	::= { connections 5 }
  
 backendConnRecycled OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -130,7 +130,7 @@ backendConnRecycled OBJECT-TYPE
 	::= { connections 6 }
  
 backendConnUnused OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -138,7 +138,7 @@ backendConnUnused OBJECT-TYPE
 	::= { connections 7 }
  
 totalSessions OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -146,7 +146,7 @@ totalSessions OBJECT-TYPE
 	::= { total 1 }
  
 totalRequests OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -154,7 +154,7 @@ totalRequests OBJECT-TYPE
 	::= { total 2 }
  
 totalPipe OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -162,7 +162,7 @@ totalPipe OBJECT-TYPE
 	::= { total 3 }
  
 totalPass OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -170,7 +170,7 @@ totalPass OBJECT-TYPE
 	::= { total 4 }
  
 totalFetch OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -178,7 +178,7 @@ totalFetch OBJECT-TYPE
 	::= { total 5 }
  
 totalHeaderBytes OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -186,7 +186,7 @@ totalHeaderBytes OBJECT-TYPE
 	::= { total 6 }
  
 totalBodyBytes OBJECT-TYPE
-	SYNTAX  Counter32
+	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
@@ -250,7 +250,7 @@ END
 -- eval: (add-hook 'write-file-hooks 'time-stamp)
 -- time-stamp-start: "\\(LAST-UPDATED\\|REVISION\\)  *\""
 -- time-stamp-end: "\""
--- time-stamp-format: "%:y%:m%:d%:H%:MZ"
+-- time-stamp-format: "%:y%02m%02d%02H%02MZ"
 -- time-stamp-line-limit: 25
 -- time-stamp-count: 2
 -- end:

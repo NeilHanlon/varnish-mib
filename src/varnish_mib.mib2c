@@ -131,11 +131,22 @@ handle_$i(netsnmp_mib_handler *handler,
   @if $varnish_type eq 'MAIN'@
     {			    
         struct VSC_C_main const *st = VSC_Main(vd, NULL);
+    @if $i.type eq 'ASN_COUNTER64'@
+        struct counter64 ctr;
+	if (!st)
+	    return SNMP_ERR_NOSUCHNAME;
+	ctr.high = st->$varnish_member >> 32;
+	ctr.low = st->$varnish_member & 0xffffffff;
+	snmp_set_var_typed_value(requests->requestvb, $i.type,
+				 &ctr,
+				 sizeof(ctr));
+    @else@
 	if (!st)
 	    return SNMP_ERR_NOSUCHNAME;
 	snmp_set_var_typed_value(requests->requestvb, $i.type,
 				 &st->$varnish_member,
 				 sizeof(st->$varnish_member));
+    @end@
     }
   @elsif $varnish_type eq 'STRING'@
     {
