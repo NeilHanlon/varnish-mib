@@ -101,8 +101,24 @@ $vars{'varnish_translate'} = sub {
 	threadsCreated            => [ 'MAIN', 'threads_created'],
 	threadsDestroyed          => [ 'MAIN', 'threads_destroyed'],
 	threadsFailed             => [ 'MAIN', 'threads_failed'],
-	threadsQueueLength        => [ 'MAIN', 'thread_queue_len'] 
+	threadsQueueLength        => [ 'MAIN', 'thread_queue_len'], 
 
+	bansTotal                 => [ 'MAIN', 'bans' ],
+	bansCompleted             => [ 'MAIN', 'bans_completed' ],
+	bansObj                   => [ 'MAIN', 'bans_obj' ],
+	bansReq                   => [ 'MAIN', 'bans_req' ],
+	bansAdded                 => [ 'MAIN', 'bans_added' ],
+	bansDeleted               => [ 'MAIN', 'bans_deleted' ],
+	bansTested                => [ 'MAIN', 'bans_tested' ],
+	bansObjectsKilled         => [ 'MAIN', 'bans_obj_killed' ],
+	bansLurkerTested          => [ 'MAIN', 'bans_lurker_tested' ],
+	bansTestTested            => [ 'MAIN', 'bans_tests_tested' ],
+	bansLurkerTestTested      => [ 'MAIN', 'bans_lurker_tests_tested' ],
+	bansLurkerObjKilled       => [ 'MAIN', 'bans_lurker_obj_killed' ],
+	bansDups                  => [ 'MAIN', 'bans_dups' ],
+	bansLurkerContention      => [ 'MAIN', 'bans_lurker_contention' ],
+	bansPersistedBytes        => [ 'MAIN', 'bans_persisted_bytes' ],
+	bansPersistedFragmentation => [ 'MAIN', 'bans_persisted_fragmentation' ],
 	
 	);
 

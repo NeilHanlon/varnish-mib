@@ -15,12 +15,12 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411241627Z"
+	LAST-UPDATED "201411241848Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "mhe@say.no"
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411241627Z"
+	REVISION "201411241848Z"
 	DESCRIPTION 
 		"Initial version."
 	::= { varnish 0 }
@@ -32,6 +32,7 @@ total   OBJECT IDENTIFIER	::= { varnish 3 }
 master	OBJECT IDENTIFIER	::= { varnish 4 }
 session	OBJECT IDENTIFIER	::= { varnish 5 }
 threads	OBJECT IDENTIFIER	::= { varnish 6 }
+bans	OBJECT IDENTIFIER	::= { varnish 7 }
 
 clientAcceptedConnections OBJECT-TYPE
 	SYNTAX  Counter64
@@ -398,6 +399,136 @@ threadsQueueLength OBJECT-TYPE
 		"Length of session queue waiting for threads"
 	::= { threads 7 }
 	
+bansTotal OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of bans"
+	::= { bans 1 }
+
+bansCompleted OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Count of completed bans"
+	::= { bans 2 }
+
+bansObj OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bans using obj.*"
+	::= { bans 3 }
+
+bansReq OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bans using req.*"
+	::= { bans 4 }
+
+bansAdded OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bans added"
+	::= { bans 5 }
+
+bansDeleted OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bans deleted"
+	::= { bans 6 }
+
+bansTested OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bans tested against objects (lookup)"
+	::= { bans 7 }
+
+bansObjectsKilled OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of objects killed by bans (lookup)"
+	::= { bans 8 }
+
+
+bansLurkerTested OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bans tested against objects (lurker)"
+	::= { bans 9 }
+
+bansTestTested OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of ban tests tested against objects (lookup)"
+	::= { bans 10 }
+
+bansLurkerTestTested OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of ban tests tested against objects (lurker)"
+	::= { bans 11 }
+
+bansLurkerObjKilled OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of objects killed by bans (lurker)"
+	::= { bans 12 }
+
+bansDups OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of ans superseded by other bans"
+	::= { bans 13 }
+
+bansLurkerContention OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of times lurker gave way for lookup"
+	::= { bans 14 }
+
+bansPersistedBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of bytes used by the persisted ban lists"
+	::= { bans 15 }
+
+bansPersistedFragmentation OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Extra bytes in persisted ban lists due to fragmentation"
+	::= { bans 17 }
+	
+
 --
 -- Groups and Compliance
 --
