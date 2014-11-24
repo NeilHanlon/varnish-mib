@@ -49,6 +49,7 @@ varnish_snmp_deinit(void)
 $vars{'varnish_translate'} = sub {
     my $name = shift;
     my %trans = (
+        uptime                    => [ 'MAIN', 'uptime' ],
 	clientAcceptedConnections => [ 'MAIN', 'sess_conn' ],
 	clientRequestsReceived    => [ 'MAIN', 'client_req' ],
 	clientCacheHits           => [ 'MAIN', 'cache_hit' ],
@@ -56,6 +57,14 @@ $vars{'varnish_translate'} = sub {
 	clientCacheMisses         => [ 'MAIN', 'cache_miss' ],
 	clientBan                 => [ 'STRING', '',
 				       { varnish_set_action => 'varnish_ban' }  ],
+
+	clientRequestsReceived    => [ 'MAIN', 'client_req' ],
+	clientRequests400         => [ 'MAIN', 'client_req_400' ],
+	clientRequests411         => [ 'MAIN', 'client_req_411' ],
+	clientRequests413         => [ 'MAIN', 'client_req_413' ],
+	clientRequests417         => [ 'MAIN', 'client_req_417' ],
+
+	
 	backendConnSuccess        => [ 'MAIN', 'backend_conn' ],
 	backendConnNotAttempted   => [ 'MAIN', 'backend_unhealthy' ],
 	backendConnToMany         => [ 'MAIN', 'backend_busy' ],
@@ -63,13 +72,38 @@ $vars{'varnish_translate'} = sub {
 	backendConnReuses         => [ 'MAIN', 'backend_reuse' ],
 	backendConnRecycled       => [ 'MAIN', 'backend_recycle' ],
 	backendConnUnused         => [ 'MAIN', 'backend_toolate' ],
+	backendConnRetry          => [ 'MAIN', 'backend_retry' ],
+	
 	totalSessions             => [ 'MAIN', 's_sess' ],
 	totalRequests             => [ 'MAIN', 's_req' ],
 	totalPipe                 => [ 'MAIN', 's_pipe' ],
 	totalPass                 => [ 'MAIN', 's_pass' ],
 	totalFetch                => [ 'MAIN', 's_fetch' ],
-	totalHeaderBytes          => [ 'MAIN', 's_req_hdrbytes' ],
-	totalBodyBytes            => [ 'MAIN', 's_req_bodybytes' ]
+	totalRequestHeaderBytes   => [ 'MAIN', 's_req_hdrbytes' ],
+	totalRequestBodyBytes     => [ 'MAIN', 's_req_bodybytes' ],
+	totalResponseHeaderBytes  => [ 'MAIN', 's_resp_hdrbytes' ],
+	totalResponseBodyBytes    => [ 'MAIN', 's_resp_bodybytes' ],
+
+	sessAccepted              => [ 'MAIN', 'sess_conn'],
+	sessQueued                => [ 'MAIN', 'sess_queued'],
+	sessDropped               => [ 'MAIN', 'sess_dropped'], 
+	sessClosed                => [ 'MAIN', 'sess_closed'],
+	sessPipeline              => [ 'MAIN', 'sess_pipeline'],
+	sessReadAhead             => [ 'MAIN', 'sess_readahead'],
+	sessHerd                  => [ 'MAIN', 'sess_herd'],
+	sessDrop                  => [ 'MAIN', 'sess_drop'],
+	sessFail                  => [ 'MAIN', 'sess_fail'],
+ 	sessPipeOverflow          => [ 'MAIN', 'sess_pipe_overflow'], 
+
+	threadsPools              => [ 'MAIN', 'pools'],
+	threadsTotal              => [ 'MAIN', 'threads'],
+	threadsLimitHits          => [ 'MAIN', 'threads_limited'],
+	threadsCreated            => [ 'MAIN', 'threads_created'],
+	threadsDestroyed          => [ 'MAIN', 'threads_destroyed'],
+	threadsFailed             => [ 'MAIN', 'threads_failed'],
+	threadsQueueLength        => [ 'MAIN', 'thread_queue_len'] 
+
+	
 	);
 
     my $r = $trans{$name};
@@ -80,8 +114,6 @@ $vars{'varnish_translate'} = sub {
 
     $vars{'varnish_type'} = $r->[0];
     $vars{'varnish_member'} = $r->[1];
-    my $setkw = qw(varnish_set_reserve2 varnish_set_free varnish_set_action
-		   varnish_set_commit varnish_set_undo);
     if ($#{$r} == 2) {
 	@vars{keys %{$r->[2]}} = values %{$r->[2]};
     } else {
@@ -101,8 +133,7 @@ print "$vars{'modulename'}\n";
 /* Variable handlers.
 
    An instance handler only hands us one request at a time, unwrapping
-   any eventual GETNEXT requests.  All OIDs are read-only, so the handlers
-   should only handle GET requests.
+   any eventual GETNEXT requests.  
 */
 
 @foreach $i scalar@
