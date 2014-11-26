@@ -27,7 +27,13 @@
 
 #define ISSPACE(c) ((c)==' '||(c)=='\t'||(c)=='\n')
 
-unsigned long vcli_timeout = 5; /* FIXME */
+static unsigned vcli_timeout = 5;
+
+void
+varnish_vcli_timeout_parser(const char *token, char *line)
+{
+	varnish_mib_timeout_parser(token, line, &vcli_timeout);
+}
 
 #define VCLI_INIT_ALLOC 16
 

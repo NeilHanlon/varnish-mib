@@ -13,13 +13,13 @@
 .\"
 .\" You should have received a copy of the GNU General Public License
 .\" along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
-.TH VARNISH-MIB 8 "November 26, 2014" "varnish-mib"
+.TH VARNISH-MIB 8 "November 27, 2014" "varnish-mib"
 .SH NAME
-varnish\-mib \- net\-snmp module for obtaining Varnish Cache statistics
+varnish\-mib \- net-snmp module for obtaining Varnish Cache statistics
 .SH SYNOPSIS
 In \fBsnmpd.conf\fR(5):
-.br
-.B dlmod varnish_mib /usr/lib/snmp/varnish-mib.so
+.PP
+.B dlmod varnish_mib /usr/lib/snmp/varnish\-mib.so
 .SH DESCRIPTION
 Dynamically loadable object module for
 .B net-snmp
@@ -28,6 +28,14 @@ loaded into
 .BR snmpd (8)
 as shown above (actual path can of course differ, depending on how
 the package was configured).
+.PP
+The module obtains most of the data using Varnish API.  Information
+about available bans (\fBbanTable\fR subtree) as well as the mechanism
+for setting bans (\fBclientBan\fR OID) are implemented via \fBvarnishd\fR
+administrative interface.  For these to work, the module must have 
+read access to Varnish secret file.  In other words, the secret file
+must be readable either by the user \fBsnmpd\fR runs as, or by one
+of this user's groups.
 .SH CONFIGURATION OPTIONS
 Configuration statements specific to
 .B varnish\-mib
@@ -36,6 +44,8 @@ must appear in the
 file below the
 .B dlmod
 statement that loads the module.
+.PP
+The following configuration statements are available:
 .TP
 \fBvarnishBanTableTimeout\fR \fINUMBER\fR
 To create \fBbanTable\fR (see below), \fBvarnish_mib\fR connects to
@@ -47,6 +57,10 @@ statement.
 
 It can also be set remotely by assigning new value to the
 \fBbanTableTimeout\fR oid.
+.TP
+\fBvarnishCLIPortTimeout\fR \fINUMBER\fR
+Sets timeout for I/O operations with Varnish administrative port.
+Default is 5 seconds.
 .SH OIDS
 The following OIDs are defined:
 .SS Branch \(dqclient\(dq
@@ -75,7 +89,7 @@ value as argument to ban.  When read, returns an empty string.  E.g.,
 to invalidate caches of all \fBpng\fR images:
 
 .EE
-snmpset \fBhostname\fR VARNISH-MIB::clientBan.0 s 'req.url ~ \(dq.png$\(dq'
+snmpset \fBhostname\fR VARNISH\-MIB::clientBan.0 s 'req.url ~ \(dq\\.png$\(dq'
 .EX
 .SS Branch \(dqbackend\(dq
 .TP

@@ -64,8 +64,8 @@ varnish_ban(netsnmp_agent_request_info   *reqinfo,
 
 unsigned banTable_timeout = 60;
 
-void
-varnish_ban_table_timeout_parser(const char *token, char *line)
+int
+varnish_mib_timeout_parser(const char *token, char *line, unsigned *retval)
 {
 	char *p;
 	unsigned long n = strtoul(line, &p, 10);
@@ -76,20 +76,27 @@ varnish_ban_table_timeout_parser(const char *token, char *line)
 				++p;
 			if (*p) {
 				config_perror("too many arguments");
-				return;
+				return 1;
 			}
 		} else {
 			config_perror("invalid timeout value");
-			return;
+			return 1;
 		}
 	}
 	
 	if (n > UINT_MAX) {
 		config_perror("timeout value out of allowed range");
-		return;
+		return 1;
 	}
 	
-	banTable_timeout = n;
+	*retval = n;
+	return 0;
+}
+
+void
+varnish_ban_table_timeout_parser(const char *token, char *line)
+{
+	varnish_mib_timeout_parser(token, line, &banTable_timeout);
 }
 
 int
@@ -100,7 +107,7 @@ varnish_ban_table_timeout_set(netsnmp_agent_request_info   *reqinfo,
 	if (*requests->requestvb->val.integer < 0 ||
 	    *requests->requestvb->val.integer > UINT_MAX)
 		return SNMP_ERR_BADVALUE;
-	DEBUGMSGTL(("varnish_ban", "setting banTable timeould %ld\n",
+	DEBUGMSGTL(("varnish_ban", "setting banTable timeout %ld\n",
 		    *requests->requestvb->val.integer));
 	banTable_timeout = *requests->requestvb->val.integer;
 	return SNMP_ERR_NOERROR;
