@@ -17,6 +17,7 @@
 
 #include "varnish_mib.h"
 #include <ctype.h>
+#include <limits.h>
 
 static int
 send_ban_cmd(vcli_conn_t *conn, const char *expr)
@@ -62,6 +63,48 @@ varnish_ban(netsnmp_agent_request_info   *reqinfo,
 }
 
 unsigned banTable_timeout = 60;
+
+void
+varnish_ban_table_timeout_parser(const char *token, char *line)
+{
+	char *p;
+	unsigned long n = strtoul(line, &p, 10);
+
+	if (*p) {
+		if (isspace(*p)) {
+			while (*p && isspace(*p))
+				++p;
+			if (*p) {
+				config_perror("too many arguments");
+				return;
+			}
+		} else {
+			config_perror("invalid timeout value");
+			return;
+		}
+	}
+	
+	if (n > UINT_MAX) {
+		config_perror("timeout value out of allowed range");
+		return;
+	}
+	
+	banTable_timeout = n;
+}
+
+int
+varnish_ban_table_timeout_set(netsnmp_agent_request_info   *reqinfo,
+			      netsnmp_request_info         *requests,
+			      struct VSM_data *vd)
+{
+	if (*requests->requestvb->val.integer < 0 ||
+	    *requests->requestvb->val.integer > UINT_MAX)
+		return SNMP_ERR_BADVALUE;
+	DEBUGMSGTL(("varnish_ban", "setting banTable timeould %ld\n",
+		    *requests->requestvb->val.integer));
+	banTable_timeout = *requests->requestvb->val.integer;
+	return SNMP_ERR_NOERROR;
+}
 
 /*
  * create a new row in the table 

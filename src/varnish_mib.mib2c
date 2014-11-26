@@ -97,7 +97,11 @@ $vars{'varnish_translate'} = sub {
 	bansLurkerContention      => [ 'MAIN', 'bans_lurker_contention' ],
 	bansPersistedBytes        => [ 'MAIN', 'bans_persisted_bytes' ],
 	bansPersistedFragmentation => [ 'MAIN', 'bans_persisted_fragmentation' ],
-	
+
+	banTableTimeout           => [ 'VAR', 'banTable_timeout',
+	               { varnish_set_action => 'varnish_ban_table_timeout_set'
+		       }  ],
+				       
 	);
 
     my $r = $trans{$name};
@@ -163,6 +167,12 @@ int varnish_ban(netsnmp_agent_request_info   *reqinfo,
 		struct VSM_data *vd);
 
 extern unsigned banTable_timeout;
+void varnish_ban_table_timeout_parser(const char *token, char *line);
+
+int varnish_ban_table_timeout_set(netsnmp_agent_request_info   *reqinfo,
+				  netsnmp_request_info         *requests,
+				  struct VSM_data *vd);
+int varnish_ban_table_timeout_get(void **valptr, size_t *valsize);
 
 @open ${name}@
 /* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
@@ -252,6 +262,26 @@ handle_$i(netsnmp_mib_handler *handler,
 	snmp_set_var_typed_value(requests->requestvb, $i.type,
 				 s, strlen(s));
     }
+  @elsif $varnish_type eq 'PROG'@
+    {
+        void *valptr;
+	size_t valsize;
+	
+	if ($varnish_member(&valptr, &valsize))
+	    return SNMP_ERR_NOSUCHNAME;
+	snmp_set_var_typed_value(requests->requestvb, $i.type,
+				 valptr, valsize);
+    @if $varnish_get_free@
+        free(valptr);
+    @end@
+  @elsif $varnish_type eq 'VAR'@
+    @if $i.type eq 'ASN_OCTET_STR'@
+	snmp_set_var_typed_value(requests->requestvb, $i.type,
+				 $varnish_member, strlen($varnish_member));
+    @else@
+	snmp_set_var_typed_value(requests->requestvb, $i.type,
+				 &$varnish_member, sizeof($varnish_member));
+    @end@
   @else@
     @printf "unrecognized type %s for %s" $varnish_type $i@
   @end@
@@ -492,6 +522,12 @@ init_$modulename(void)
 
   DEBUGMSGTL(("$modulename", "Initializing\n"));
 
+  if (!register_config_handler("snmpd", "varnishBanTableTimeout",
+			       varnish_ban_table_timeout_parser,
+			       NULL,
+			       "varnishBanTableTimeout SECONDS"))
+	  snmp_log(LOG_ERR,"can't register config handler\n");
+	  
   @foreach $i scalar@
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("$i", handle_$i,

@@ -15,7 +15,7 @@
 # along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ(2.69)
-AC_INIT([varnish-mib], 0.1, [gray@gnu.org])
+AC_INIT([varnish-mib], 0.9.90, [gray@gnu.org])
 AC_CONFIG_SRCDIR(src/varnish_mib.mib2c)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR([build-aux])

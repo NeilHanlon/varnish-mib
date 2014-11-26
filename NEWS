@@ -1,10 +1,10 @@
-Varnish-mib NEWS -- history of user-visible changes. 2014-11-13
+Varnish-mib NEWS -- history of user-visible changes. 2014-11-26
 Copyright (C) 2014 Sergey Poznyakoff
 See the end of file for copying conditions.
 
 Please send Vmod-binlog bug reports to <gray@gnu.org>
 
-Version 0.1, (git)
+Version 0.9.90, (git)
 
 Initial release.
 

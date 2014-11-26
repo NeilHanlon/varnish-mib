@@ -9,7 +9,8 @@ VARNISH-MIB DEFINITIONS ::= BEGIN
 -- *************************************************************
 
 IMPORTS
-	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter64, TimeTicks
+	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter64, TimeTicks,
+	Unsigned32
 		FROM SNMPv2-SMI
 	DateAndTime
 		FROM SNMPv2-TC
@@ -17,14 +18,16 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411260759Z"
+	LAST-UPDATED "201411261613Z"
 	ORGANIZATION "Shared Autonomous sYstems"
-	CONTACT-INFO "mhe@say.no"
+	CONTACT-INFO "Morten Hermanrud <mhe@say.no>
+	              Sergey Poznyakoff <gray@gnu.org>
+		     "
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411260759Z"
+	REVISION "201411261044Z"
 	DESCRIPTION 
-		"Initial version."
+		"Second revision."
 	::= { varnish 0 }
 
 varnish OBJECT IDENTIFIER	::= { enterprises 33043 6 1 }
@@ -35,13 +38,14 @@ master	OBJECT IDENTIFIER	::= { varnish 4 }
 session	OBJECT IDENTIFIER	::= { varnish 5 }
 threads	OBJECT IDENTIFIER	::= { varnish 6 }
 bans	OBJECT IDENTIFIER	::= { varnish 7 }
+agent	OBJECT IDENTIFIER	::= { varnish 8 }
 
 clientAcceptedConnections OBJECT-TYPE
 	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Client connections accepted"
+		"Client connections accepted."
 	::= { client 1 }
 
 clientRequestsReceived OBJECT-TYPE
@@ -49,7 +53,7 @@ clientRequestsReceived OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Client requests received"
+		"Client requests received."
 	::= { client 2 }
 
 clientCacheHits OBJECT-TYPE
@@ -57,7 +61,7 @@ clientCacheHits OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Cache hits"
+		"Cache hits."
 	::= { client 3 }
 
 clientCacheHitsPass OBJECT-TYPE
@@ -65,7 +69,7 @@ clientCacheHitsPass OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Cache hits for pass"
+		"Cache hits for pass."
 	::= { client 4 }
 
 clientCacheMisses OBJECT-TYPE
@@ -73,13 +77,13 @@ clientCacheMisses OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Cache misses"
+		"Cache misses."
 	::= { client 5 }
 
 VarnishBanString ::= TEXTUAL-CONVENTION
     DISPLAY-HINT "1024t"
     STATUS       current
-    DESCRIPTION ""
+    DESCRIPTION "A string containing Varnish ban expression."
     SYNTAX       OCTET STRING (SIZE (0..1024))
        	
 clientBan OBJECT-TYPE
@@ -96,7 +100,7 @@ clientRequests400 OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Client requests received, subject to 400 errors"
+		"Client requests received, subject to 400 errors."
 	::= { client 7 }
 
 clientRequests411 OBJECT-TYPE
@@ -104,16 +108,15 @@ clientRequests411 OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Client requests received, subject to 411 errors"
+		"Client requests received, subject to 411 errors."
 	::= { client 8 }
-
 
 clientRequests413 OBJECT-TYPE
 	SYNTAX  Counter64
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Client requests received, subject to 413 errors"
+		"Client requests received, subject to 413 errors."
 	::= { client 9 }
 
 clientRequests417 OBJECT-TYPE
@@ -121,7 +124,7 @@ clientRequests417 OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Client requests received, subject to 417 errors"
+		"Client requests received, subject to 417 errors."
 	::= { client 10 }
 	
 connections OBJECT IDENTIFIER    ::= { backend 1 }
@@ -131,7 +134,7 @@ backendConnSuccess OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections success"
+		"Backend connections success."
 	::= { connections 1 }
  
 backendConnNotAttempted OBJECT-TYPE
@@ -139,7 +142,7 @@ backendConnNotAttempted OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections not attempted"
+		"Backend connections not attempted."
 	::= { connections 2 }
  
 backendConnToMany OBJECT-TYPE
@@ -147,7 +150,7 @@ backendConnToMany OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections too many"
+		"Backend connections too many."
 	::= { connections 3 }
  
 backendConnFailures OBJECT-TYPE
@@ -155,7 +158,7 @@ backendConnFailures OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections failures"
+		"Backend connections failures."
 	::= { connections 4 }
  
 backendConnReuses OBJECT-TYPE
@@ -163,7 +166,7 @@ backendConnReuses OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections reuses"
+		"Backend connections reuses."
 	::= { connections 5 }
  
 backendConnRecycled OBJECT-TYPE
@@ -171,7 +174,7 @@ backendConnRecycled OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections recycles"
+		"Backend connections recycles."
 	::= { connections 6 }
  
 backendConnUnused OBJECT-TYPE
@@ -179,7 +182,7 @@ backendConnUnused OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections unused"
+		"Backend connections unused."
 	::= { connections 7 }
 
 backendConnRetry OBJECT-TYPE
@@ -187,7 +190,7 @@ backendConnRetry OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Backend connections retried"
+		"Backend connections retried."
 	::= { connections 8 }
 	
 totalSessions OBJECT-TYPE
@@ -195,7 +198,7 @@ totalSessions OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total Sessions"
+		"Total Sessions."
 	::= { total 1 }
  
 totalRequests OBJECT-TYPE
@@ -203,7 +206,7 @@ totalRequests OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total Requests"
+		"Total Requests."
 	::= { total 2 }
  
 totalPipe OBJECT-TYPE
@@ -211,7 +214,7 @@ totalPipe OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total pipe"
+		"Total pipe."
 	::= { total 3 }
  
 totalPass OBJECT-TYPE
@@ -219,7 +222,7 @@ totalPass OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total pass"
+		"Total pass."
 	::= { total 4 }
  
 totalFetch OBJECT-TYPE
@@ -227,7 +230,7 @@ totalFetch OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total fetch"
+		"Total fetch."
 	::= { total 5 }
  
 totalRequestHeaderBytes OBJECT-TYPE
@@ -235,7 +238,7 @@ totalRequestHeaderBytes OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total request header bytes"
+		"Total request header bytes."
 	::= { total 6 }
  
 totalRequestBodyBytes OBJECT-TYPE
@@ -243,7 +246,7 @@ totalRequestBodyBytes OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total request body bytes"
+		"Total request body bytes."
 	::= { total 7 }
 
 totalResponseHeaderBytes OBJECT-TYPE
@@ -251,7 +254,7 @@ totalResponseHeaderBytes OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total response body bytes"
+		"Total response body bytes."
 	::= { total 8 }
 	
 totalResponseBodyBytes OBJECT-TYPE
@@ -259,7 +262,7 @@ totalResponseBodyBytes OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total response body bytes"
+		"Total response body bytes."
 	::= { total 9 }
 
 uptime OBJECT-TYPE
@@ -267,7 +270,7 @@ uptime OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Master daemon uptime"
+		"Master daemon uptime."
 	::= { master 1 }	
 
 sessAccepted OBJECT-TYPE
@@ -275,7 +278,7 @@ sessAccepted OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of sessions succesfully accepted"
+		"Number of sessions succesfully accepted."
 	::= { session 1 }
 
 sessQueued OBJECT-TYPE
@@ -283,7 +286,7 @@ sessQueued OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of times session was queued waiting for a thread"
+		"Number of times session was queued waiting for a thread."
 	::= { session 2 }
 
 sessDropped OBJECT-TYPE
@@ -291,7 +294,7 @@ sessDropped OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of sessions dropped because session queue was full"
+		"Number of sessions dropped because session queue was full."
 	::= { session 3 }
 
 sessClosed OBJECT-TYPE
@@ -299,7 +302,7 @@ sessClosed OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of sessions closed"
+		"Number of sessions closed."
 	::= { session 4 }
 
 sessPipeline OBJECT-TYPE
@@ -307,7 +310,7 @@ sessPipeline OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Session pipeline"
+		"Session pipeline."
 	::= { session 5 }
 
 sessReadAhead OBJECT-TYPE
@@ -315,7 +318,7 @@ sessReadAhead OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Session read-ahead"
+		"Session read-ahead."
 	::= { session 6 }
 
 sessHerd OBJECT-TYPE
@@ -323,7 +326,7 @@ sessHerd OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Session herd"
+		"Session herd."
 	::= { session 7 }	
 		
 sessDrop OBJECT-TYPE
@@ -331,7 +334,7 @@ sessDrop OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of sessions dropped for thread"
+		"Number of sessions dropped for thread."
 	::= { session 8 }	
 
 sessFail OBJECT-TYPE
@@ -339,7 +342,7 @@ sessFail OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of session accept failures"
+		"Number of session accept failures."
 	::= { session 9 }	
 
 sessPipeOverflow OBJECT-TYPE
@@ -347,7 +350,7 @@ sessPipeOverflow OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of session pipe overflows"
+		"Number of session pipe overflows."
 	::= { session 10 }	
 
 threadsPools OBJECT-TYPE
@@ -355,7 +358,7 @@ threadsPools OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of thread pools"
+		"Number of thread pools."
 	::= { threads 1 }	
 
 threadsTotal OBJECT-TYPE
@@ -363,7 +366,7 @@ threadsTotal OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of thread pools"
+		"Number of thread pools."
 	::= { threads 2 }	
 
 threadsLimitHits OBJECT-TYPE
@@ -372,7 +375,7 @@ threadsLimitHits OBJECT-TYPE
 	STATUS  current
 	DESCRIPTION
 		"Number of times more threads were needed, but limit was
-		 reached in a thread pool"
+		 reached in a thread pool."
 	::= { threads 3 }	
 
 threadsCreated OBJECT-TYPE
@@ -380,7 +383,7 @@ threadsCreated OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total number of threads created in all pools"
+		"Total number of threads created in all pools."
 	::= { threads 4 }	
 
 threadsDestroyed OBJECT-TYPE
@@ -388,7 +391,7 @@ threadsDestroyed OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total number of threads destroyed in all pools"
+		"Total number of threads destroyed in all pools."
 	::= { threads 5 }	
 
 threadsFailed OBJECT-TYPE
@@ -396,7 +399,7 @@ threadsFailed OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of times creating a thread failed"
+		"Number of times creating a thread failed."
 	::= { threads 6 }	
 
 threadsQueueLength OBJECT-TYPE
@@ -404,7 +407,7 @@ threadsQueueLength OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Length of session queue waiting for threads"
+		"Length of session queue waiting for threads."
 	::= { threads 7 }
 	
 bansTotal OBJECT-TYPE
@@ -412,7 +415,7 @@ bansTotal OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Total number of bans"
+		"Total number of bans."
 	::= { bans 1 }
 
 bansCompleted OBJECT-TYPE
@@ -420,7 +423,7 @@ bansCompleted OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Count of completed bans"
+		"Count of completed bans."
 	::= { bans 2 }
 
 bansObj OBJECT-TYPE
@@ -428,7 +431,7 @@ bansObj OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bans using obj.*"
+		"Number of bans using obj.*."
 	::= { bans 3 }
 
 bansReq OBJECT-TYPE
@@ -436,7 +439,7 @@ bansReq OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bans using req.*"
+		"Number of bans using req.*."
 	::= { bans 4 }
 
 bansAdded OBJECT-TYPE
@@ -444,7 +447,7 @@ bansAdded OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bans added"
+		"Number of bans added."
 	::= { bans 5 }
 
 bansDeleted OBJECT-TYPE
@@ -452,7 +455,7 @@ bansDeleted OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bans deleted"
+		"Number of bans deleted."
 	::= { bans 6 }
 
 bansTested OBJECT-TYPE
@@ -460,7 +463,7 @@ bansTested OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bans tested against objects (lookup)"
+		"Number of bans tested against objects (lookup)."
 	::= { bans 7 }
 
 bansObjectsKilled OBJECT-TYPE
@@ -468,7 +471,7 @@ bansObjectsKilled OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of objects killed by bans (lookup)"
+		"Number of objects killed by bans (lookup)."
 	::= { bans 8 }
 
 
@@ -477,7 +480,7 @@ bansLurkerTested OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bans tested against objects (lurker)"
+		"Number of bans tested against objects (lurker)."
 	::= { bans 9 }
 
 bansTestTested OBJECT-TYPE
@@ -485,7 +488,7 @@ bansTestTested OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of ban tests tested against objects (lookup)"
+		"Number of ban tests tested against objects (lookup)."
 	::= { bans 10 }
 
 bansLurkerTestTested OBJECT-TYPE
@@ -493,7 +496,7 @@ bansLurkerTestTested OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of ban tests tested against objects (lurker)"
+		"Number of ban tests tested against objects (lurker)."
 	::= { bans 11 }
 
 bansLurkerObjKilled OBJECT-TYPE
@@ -501,7 +504,7 @@ bansLurkerObjKilled OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of objects killed by bans (lurker)"
+		"Number of objects killed by bans (lurker)."
 	::= { bans 12 }
 
 bansDups OBJECT-TYPE
@@ -509,7 +512,7 @@ bansDups OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of ans superseded by other bans"
+		"Number of ans superseded by other bans."
 	::= { bans 13 }
 
 bansLurkerContention OBJECT-TYPE
@@ -517,7 +520,7 @@ bansLurkerContention OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of times lurker gave way for lookup"
+		"Number of times lurker gave way for lookup."
 	::= { bans 14 }
 
 bansPersistedBytes OBJECT-TYPE
@@ -525,7 +528,7 @@ bansPersistedBytes OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of bytes used by the persisted ban lists"
+		"Number of bytes used by the persisted ban lists."
 	::= { bans 15 }
 
 bansPersistedFragmentation OBJECT-TYPE
@@ -533,7 +536,7 @@ bansPersistedFragmentation OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Extra bytes in persisted ban lists due to fragmentation"
+		"Extra bytes in persisted ban lists due to fragmentation."
 	::= { bans 17 }
 
 banTable OBJECT-TYPE
@@ -541,7 +544,7 @@ banTable OBJECT-TYPE
        MAX-ACCESS not-accessible
        STATUS     current
        DESCRIPTION
-             "The (conceptual) table listing available bans"
+             "The (conceptual) table listing available bans."
        ::= { bans 18 }
 
 varnishBanEntry OBJECT-TYPE
@@ -549,7 +552,7 @@ varnishBanEntry OBJECT-TYPE
        MAX-ACCESS not-accessible
        STATUS     current
        DESCRIPTION
-             "An entry (conceptual row) representing a ban"
+             "An entry (conceptual row) representing a ban."
        INDEX      { banIndex }
        ::= { banTable 1 }
 
@@ -565,7 +568,7 @@ banIndex OBJECT-TYPE
 	MAX-ACCESS not-accessible
 	STATUS  current
 	DESCRIPTION
-		"A number uniquely identifying each ban"
+		"A number uniquely identifying each ban."
 	::= { varnishBanEntry 1 }
 
 banTime OBJECT-TYPE
@@ -573,7 +576,7 @@ banTime OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Time when the ban was created"
+		"Time when the ban was created."
 	::= { varnishBanEntry 2 }
 
 banRefCount OBJECT-TYPE
@@ -581,7 +584,7 @@ banRefCount OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"Number of references to this ban"
+		"Number of references to this ban."
 	::= { varnishBanEntry 3 }
 	
 banExpression OBJECT-TYPE
@@ -589,9 +592,18 @@ banExpression OBJECT-TYPE
 	MAX-ACCESS read-only
 	STATUS  current
 	DESCRIPTION
-		"VCL expression of the ban"
+		"VCL expression of the ban."
 	::= { varnishBanEntry 4 }
-	
+
+banTableTimeout OBJECT-TYPE
+	SYNTAX	Unsigned32
+	MAX-ACCESS read-write
+	STATUS	current
+	DESCRIPTION
+		"If banTable content is cached, this variable keeps
+		 the time in seconds after which the table is reloaded.
+		 Setting it changes that value."
+	::= { agent 1 }
 --
 -- Groups and Compliance
 --
@@ -617,6 +629,7 @@ varnishGroup OBJECT-GROUP
 		backendConnReuses,
 		backendConnRecycled,
 		backendConnUnused,
+		backendConnRetry,
 		totalSessions,
 		totalRequests,
 		totalPipe,
@@ -658,7 +671,7 @@ varnishGroup OBJECT-GROUP
 		}
 
 	STATUS  current
-	DESCRIPTION "Group of Varnish objects"
+	DESCRIPTION "Group of Varnish objects."
 	::= { varnishGroups 1 }
 
 --
@@ -667,7 +680,7 @@ varnishGroup OBJECT-GROUP
 varnishStandardComplianceV1 MODULE-COMPLIANCE
 	STATUS  current
 	DESCRIPTION
-		"Compliance for an Varnish agent"
+		"Compliance for a Varnish agent."
 
 	MODULE 
 	MANDATORY-GROUPS { varnishGroup }
@@ -681,6 +694,6 @@ END
 -- time-stamp-start: "\\(LAST-UPDATED\\|REVISION\\)  *\""
 -- time-stamp-end: "\""
 -- time-stamp-format: "%:y%02m%02d%02H%02MZ"
--- time-stamp-line-limit: 25
+-- time-stamp-line-limit: 32
 -- time-stamp-count: 2
 -- end:

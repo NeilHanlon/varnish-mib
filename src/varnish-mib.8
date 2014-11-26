@@ -13,7 +13,7 @@
 .\"
 .\" You should have received a copy of the GNU General Public License
 .\" along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
-.TH VARNISH-MIB 8 "November 15, 2014" "varnish-mib"
+.TH VARNISH-MIB 8 "November 26, 2014" "varnish-mib"
 .SH NAME
 varnish\-mib \- net\-snmp module for obtaining Varnish Cache statistics
 .SH SYNOPSIS
@@ -23,80 +23,251 @@ In \fBsnmpd.conf\fR(5):
 .SH DESCRIPTION
 Dynamically loadable object module for
 .B net-snmp
-.BR snmpd (8),
 that provides access to Varnish Cache statistics.  The module is
 loaded into
-.B snmpd
+.BR snmpd (8)
 as shown above (actual path can of course differ, depending on how
 the package was configured).
-.PP
-The following OIDs are defined:
+.SH CONFIGURATION OPTIONS
+Configuration statements specific to
+.B varnish\-mib
+must appear in the
+.B snmpd.conf
+file below the
+.B dlmod
+statement that loads the module.
 .TP
-.B VARNISH-MIB::clientAcceptedConnections.0
+\fBvarnishBanTableTimeout\fR \fINUMBER\fR
+To create \fBbanTable\fR (see below), \fBvarnish_mib\fR connects to
+\fBvarnish\fR administration port and issues the \fBban.list\fR
+command.  To minimize the performance impact, the information obtained
+is cached for a predefined amount of time (60 seconds by default).
+This amount (in seconds) is configured by \fBvarnishBanTableTimeout\fR
+statement.
+
+It can also be set remotely by assigning new value to the
+\fBbanTableTimeout\fR oid.
+.SH OIDS
+The following OIDs are defined:
+.SS Branch \(dqclient\(dq
+.TP
+.B clientAcceptedConnections
 Number of accepted connections.
 .TP
-.B VARNISH-MIB::clientRequestsReceived.0
+.B clientRequestsReceived
 Number of received HTTP requests.
 .TP
-.B VARNISH-MIB::clientCacheHits.0
+.B clientCacheHits
 Number of cache hits.  A cache hit indicates that an object has been
 delivered to a  client without fetching it from a backend server.
 .TP
-.B VARNISH-MIB::clientCacheHitsPass.0
+.B clientCacheHitsPass
 Number of hits for pass.  A cache hit for pass indicates that Varnish
 passes the request to the backend and this decision itself has been cached. 
 .TP
-.B VARNISH-MIB::clientCacheMisses.0
+.B clientCacheMisses
 Number of misses.  A cache miss indicates the object was fetched from
 the backend before delivering it to the client.
 .TP
-.B VARNISH-MIB::backendConnSuccess.0
+.B clientBan
+A write-only OID.  When set, invalidates the cache using the supplied
+value as argument to ban.  When read, returns an empty string.  E.g.,
+to invalidate caches of all \fBpng\fR images:
+
+.EE
+snmpset \fBhostname\fR VARNISH-MIB::clientBan.0 s 'req.url ~ \(dq.png$\(dq'
+.EX
+.SS Branch \(dqbackend\(dq
+.TP
+.B backendConnSuccess
 Number of successful connections to the backend.
 .TP
-.B VARNISH-MIB::backendConnNotAttempted.0
+.B backendConnNotAttempted
 Number of backend connections not attempted, because of the unhealthy
 status of the backend.
 .TP
-.B VARNISH-MIB::backendConnToMany.0
+.B backendConnToMany
 Number of backend connections failed because there were too many
 connections open.
 .TP
-.B VARNISH-MIB::backendConnFailures.0
+.B backendConnFailures
 Number of failed backend connections.
 .TP
-.B VARNISH-MIB::backendConnReuses.0
+.B backendConnReuses
 Number of reused backend connections.  This counter is increased
 whenever Varnish reuses a recycled connection.
 .TP
-.B VARNISH-MIB::backendConnRecycled.0
+.B backendConnRecycled
 Number of backend connection recycles.  This counter is increased
 whenever Varnish has keep-alive connection that is put back into
 the pool of connections.  It has not yet been used, but it might be,
 unless the backend closes it.
 .TP
-.B VARNISH-MIB::backendConnUnused.0
+.B backendConnUnused
 Number of unused backend connections.
 .TP
-.B VARNISH-MIB::totalSessions.0
+.B backendConnRetry
+Backend connections retried.
+.SS Branch \(dqtotal\(dq
+.TP
+.B totalSessions
 Total number of sessions served since the startup.
 .TP
-.B VARNISH-MIB::totalRequests.0
+.B totalRequests
 Total number of requests received since the startup.
 .TP
-.B VARNISH-MIB::totalPipe.0
+.B totalPipe
 Total number of requests piped to the backend.
 .TP
-.B VARNISH-MIB::totalPass.0
+.B totalPass
 Total number of requests passed to the backend.
 .TP
-.B VARNISH-MIB::totalFetch.0
+.B totalFetch
 Total number of fetches.
 .TP
-.B VARNISH-MIB::totalHeaderBytes.0
+.B totalRequestHeaderBytes
 Total request header bytes received.
 .TP
-.B VARNISH-MIB::totalBodyBytes.0
+.B totalRequestBodyBytes
 Total request body bytes received.
+.TP
+.B totalResponseHeaderBytes
+Total header bytes sent out in responses.
+.TP
+.B totalResponseBodyBytes
+Total body bytes sent out in responses.
+.SS Branch \(dqmaster\(dq
+.TP
+.B uptime
+Master daemon uptime, in hundredths of a second.
+.SS Branch \(dqsession\(dq
+.TP
+.B sessAccepted
+Number of sessions succesfully accepted.
+.TP
+.B sessQueued
+Number of times session was queued waiting for a thread.
+.TP
+.B sessDropped
+Number of sessions dropped because session queue was full.
+.TP
+.B sessClosed
+Number of sessions closed.
+.TP
+.B sessPipeline
+Session pipeline.
+.TP
+.B sessReadAhead
+Session read-ahead.
+.TP
+.B sessHerd
+Session herd.
+.TP
+.B sessDrop
+Number of sessions dropped for thread.
+.TP
+.B sessFail
+Number of session accept failures.
+.TP
+.B sessPipeOverflow
+Number of session pipe overflows.
+.SS Branch \(dqthreads\(dq
+.TP
+.B threadsPools
+Number of thread pools.
+.TP
+.B threadsTotal
+Number of thread pools.
+.TP
+.B threadsLimitHits
+Number of times more threads were needed, but limit was reached in a
+thread pool. 
+.TP
+.B threadsCreated
+Total number of threads created in all pools.
+.TP
+.B threadsDestroyed
+Total number of threads destroyed in all pools.
+.TP
+.B threadsFailed
+Number of times creating a thread failed.
+.SS Branch \(dqbans\(dq
+.TP
+.B bansTotal
+Total number of bans.
+.TP
+.B bansCompleted
+Count of completed bans.
+.TP
+.B bansObj
+Number of bans using \fBobj.*\fR.
+.TP
+.B bansReq
+Number of bans using \fBreq.*\fR.
+.TP
+.B bansAdded
+Number of bans added.
+.TP
+.B bansDeleted
+Number of bans deleted.
+.TP
+.B bansTested
+Number of bans tested against objects (lookup).
+.TP
+.B bansObjectsKilled
+Number of objects killed by bans (lookup).
+.TP
+.B bansLurkerTested
+Number of bans tested against objects (lurker).
+.TP
+.B bansTestTested
+Number of ban tests tested against objects (lookup).
+.TP
+.B bansLurkerTestTested
+Number of ban tests tested against objects (lurker).
+.TP
+.B bansLurkerObjKilled
+Number of objects killed by bans (lurker).
+.TP
+.B bansDups
+Number of ans superseded by other bans.
+.TP
+.B bansLurkerContention
+Number of times lurker gave way for lookup.
+.TP
+.B bansPersistedBytes
+Number of bytes used by the persisted ban lists.
+.TP
+.B bansPersistedFragmentation
+Extra bytes in persisted ban lists due to fragmentation.
+.TP
+.B banTable
+A table of configured varnish bans.  It is indexed by the
+\fBbanIndex\fR OID.  Each row has the following elements:
+.RS
+.TP
+.B banTime
+Time when the ban was set.
+.TP
+.B banRefCount
+Number of references to that ban.  This equals to the number of objects
+in the varnish cache affected by that ban.
+.TP
+.B banExpression
+VCL expression of the ban.
+.RE
+
+Notice that for performance reasons, the ban table is cached, so the
+total number of rows in the \fBbanTable\fR may diverge from the value
+of \fBbansTotal\fR variable.  The default update interval is 60
+seconds.  It can be configured either in the \fBsnmpd.conf\fR file
+(see the \fBvarnishBanTableTimeout\fR statement above), or via
+the \fBbanTableTimeout\fR variable.
+.SS Branch \(dqagent\(dq
+.TP
+.B banTableTimeout
+Update interval for the \fBbanTable\fR cache.  If set, it takes effect
+immediately.
 .SH "SEE ALSO"
 .BR snmpd.conf (5),
 .BR snmpd (8),
