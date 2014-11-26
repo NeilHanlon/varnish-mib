@@ -5,9 +5,9 @@ See the end of file for copying conditions.
 * Introduction
 
 This file contains brief information about configuring, testing
-and using vmod-binlog. It is *not* intended as a replacement
+and using Varnish-mib. It is *not* intended as a replacement
 for the documentation, and is provided as a brief reference only.
-For a detailed documentation, please see the varnish-mib (8)
+For a detailed documentation, please see the varnish-mib(8)
 manpage.
 
 * Overview
