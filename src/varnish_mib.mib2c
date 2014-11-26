@@ -23,28 +23,6 @@
    vi: set ro:
 */
 @enddefine@
-@open ${name}@
-/* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
-
-#include "varnish_mib.h"
-
-static struct VSM_data *vd;
-
-void
-varnish_snmp_init(void)
-{
-    vd = VSM_New();
-
-    if (VSM_Open(vd))
-        exit(1);
-}
-
-void
-varnish_snmp_deinit(void)
-{
-    VSM_Close(vd);
-}
-
 @startperl@
 $vars{'varnish_translate'} = sub {
     my $name = shift;
@@ -141,10 +119,83 @@ $vars{'varnish_translate'} = sub {
 $vars{'modulename'} = $vars{'name'};
 $vars{'modulename'} =~ s#.*/##;
 $vars{'modulename'} =~ s/\.c$//;
-print "$vars{'modulename'}\n";
+#print "$vars{'modulename'}\n";
 
 0;
 @endperl@
+@open ${modulename}.h@
+/* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
+#include <config.h>
+#include <stdlib.h>
+#include <stdint.h>
+
+#include <vapi/vsc.h>
+#include <vapi/vsm.h>
+#include <vcli.h>
+
+#include <net-snmp/net-snmp-config.h>
+#include <net-snmp/net-snmp-includes.h>
+#include <net-snmp/agent/net-snmp-agent-includes.h>
+
+typedef struct vcli_conn {
+	int fd;
+	char *secret;
+	int resp;
+	char *base;
+	size_t bufmax;
+	size_t bufsize;
+} vcli_conn_t;
+
+int vcli_write(vcli_conn_t *conn);
+int vcli_read_response(vcli_conn_t *conn);
+int vcli_vasprintf(vcli_conn_t *conn, const char *fmt, va_list ap);
+int vcli_asprintf(vcli_conn_t *conn, const char *fmt, ...);
+void vcli_disconnect(vcli_conn_t *conn);
+int vcli_connect(struct VSM_data *vd, vcli_conn_t *conn);
+
+struct VSM_data *varnish_get_vsm_data(void);
+
+int varnish_auth_response(const char *file, const char *challenge,
+			  char response[CLI_AUTH_RESPONSE_LEN + 1]);
+
+int varnish_ban(netsnmp_agent_request_info   *reqinfo,
+		netsnmp_request_info         *requests,
+		struct VSM_data *vd);
+
+extern unsigned banTable_timeout;
+
+@open ${name}@
+/* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
+
+#include "varnish_mib.h"
+
+static struct VSM_data *vd;
+
+void
+varnish_snmp_init(void)
+{
+    vd = VSM_New();
+
+    if (VSM_Open(vd))
+        exit(1);
+}
+
+void
+varnish_snmp_deinit(void)
+{
+    VSM_Close(vd);
+}
+
+struct VSM_data *
+varnish_get_vsm_data()
+{
+    if (VSM_Abandoned(vd)) {
+        DEBUGMSGTL(("$modulename", "reopening vd\n"));
+	VSM_Close(vd);
+	VSM_Open(vd);
+    }
+    return vd;
+}
 
 /* Variable handlers.
 
@@ -273,6 +324,164 @@ handle_$i(netsnmp_mib_handler *handler,
 }
 @end@
 
+@foreach $i table@
+  ## Determine the first/last column names
+  @eval $first_column = "-"@
+  @eval $last_column = "-"@
+  @foreach $c column@
+    @if $c.readable@
+      @if "$first_column" eq "-"@
+        @eval $first_column = $c@
+      @end@
+      @eval $last_column = $c@
+    @end@
+  @end@
+
+@push@
+@append ${modulename}.h@
+/* column number definitions for table $i */
+  @foreach $c column@
+#define COLUMN_$c.uc		$c.subid
+  @end@
+
+struct ${i}_entry {
+    /* Index values */
+    @foreach $idx index@
+     @if $idx.needlength@
+    $idx.decl *$idx;
+    size_t ${idx}_len;
+     @else@
+    $idx.decl $idx;
+     @end@
+    @end@
+
+    /* Column values */
+    @foreach $c nonindex@
+     @if $c.readable@
+      @if $c.needlength@
+    $c.decl *$c;
+    size_t ${c}_len;
+      @else@
+    $c.decl $c;
+      @end@
+     @end@
+    @end@
+};
+
+int ${i}_load(netsnmp_cache *cache, void *vmagic);
+void ${i}_free(netsnmp_cache *cache, void *vmagic);
+@pop@
+
+/** handles requests for the $i table */
+static int
+handle_table_${i}(
+    netsnmp_mib_handler               *handler,
+    netsnmp_handler_registration      *reginfo,
+    netsnmp_agent_request_info        *reqinfo,
+    netsnmp_request_info              *requests)
+{
+    netsnmp_request_info       *request;
+    netsnmp_table_request_info *table_info;
+    struct ${i}_entry          *table_entry;
+
+    switch (reqinfo->mode) {
+    case MODE_GET:
+        for (request = requests; request; request = request->next) {
+            table_entry = (struct ${i}_entry *)
+                           netsnmp_tdata_extract_entry(request);
+            table_info  =  netsnmp_extract_table_info(request);
+    
+            switch (table_info->colnum) {
+            @foreach $c column@
+              @if $c.readable@
+            case COLUMN_$c.uc:
+                if (!table_entry) {
+                    netsnmp_set_request_error(reqinfo, request,
+                                              SNMP_NOSUCHINSTANCE);
+                    continue;
+                }
+                @if $c.needlength@
+                snmp_set_var_typed_value(request->requestvb, $c.type,
+                                         table_entry->$c,
+                                         table_entry->${c}_len);
+                @else@
+                snmp_set_var_typed_integer(request->requestvb, $c.type,
+                                           table_entry->$c);
+                @end@
+                break;
+              @end@
+            @end@
+            default:
+                netsnmp_set_request_error(reqinfo, request,
+                                          SNMP_NOSUCHOBJECT);
+                break;
+            }
+        }
+        break;
+    default:
+	/* we should never get here, so this is a really bad error */
+	snmp_log(LOG_ERR, "unknown mode (%d) in handle_table_${i}\n",
+                 reqinfo->mode);
+	return SNMP_ERR_GENERR;
+
+    }
+    return SNMP_ERR_NOERROR;
+}
+
+/** Initialize the $i table by defining its contents and how it's structured */
+static void
+initialize_table_$i(void)
+{
+    const oid ${i}_oid[] = {$i.commaoid};
+    const size_t ${i}_oid_len   = OID_LENGTH(${i}_oid);
+    netsnmp_handler_registration    *reg;
+    netsnmp_tdata                   *table_data;
+    netsnmp_table_registration_info *table_info;
+    netsnmp_cache                   *cache;
+
+    DEBUGMSGTL(("${name}:init", "initializing table $i\n"));
+
+    reg = netsnmp_create_handler_registration("$i", handle_table_${i},
+	                                      ${i}_oid, ${i}_oid_len,
+                                              HANDLER_CAN_RONLY);
+
+    table_data = netsnmp_tdata_create_table("$i", 0);
+    if (!table_data) {
+        snmp_log(LOG_ERR,"error creating tdata table for $i\n");
+        return;
+    }
+    cache = netsnmp_cache_create(${i}_timeout,
+                                  ${i}_load, ${i}_free,
+                                  ${i}_oid, ${i}_oid_len);
+    if (!cache) {
+        snmp_log(LOG_ERR,"error creating cache for $i\n");
+    } else
+        cache->magic = (void *)table_data;
+    table_info = SNMP_MALLOC_TYPEDEF(netsnmp_table_registration_info);
+    if (!table_info) {
+        snmp_log(LOG_ERR,"error creating table info for $i\n");
+        return;
+    }
+    netsnmp_table_helper_add_indexes(table_info,
+    @foreach $idx index@
+                           $idx.type,  /* index: $idx */
+    @end@
+                           0);
+
+    table_info->min_column = COLUMN_$first_column.uc;
+    table_info->max_column = COLUMN_$last_column.uc;
+    
+    netsnmp_tdata_register(reg, table_data, table_info);
+    if (cache) 
+	netsnmp_inject_handler(reg, netsnmp_cache_handler_get(cache));
+/*	
+        netsnmp_inject_handler_before(reg, netsnmp_cache_handler_get(cache),
+                                      TABLE_TDATA_NAME);
+*/
+}
+
+@end@
+
 /** Initializes the $name module */
 void
 init_$modulename(void)
@@ -294,6 +503,9 @@ init_$modulename(void)
                                HANDLER_CAN_RWRITE
     @end@
         ));
+  @end@
+  @foreach $i table@
+    initialize_table_$i();
   @end@
     varnish_snmp_init();
 }

@@ -11,16 +11,18 @@ VARNISH-MIB DEFINITIONS ::= BEGIN
 IMPORTS
 	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter64, TimeTicks
 		FROM SNMPv2-SMI
+	DateAndTime
+		FROM SNMPv2-TC
 	OBJECT-GROUP, MODULE-COMPLIANCE
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411241848Z"
+	LAST-UPDATED "201411260759Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "mhe@say.no"
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411241848Z"
+	REVISION "201411260759Z"
 	DESCRIPTION 
 		"Initial version."
 	::= { varnish 0 }
@@ -74,8 +76,14 @@ clientCacheMisses OBJECT-TYPE
 		"Cache misses"
 	::= { client 5 }
 
+VarnishBanString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "1024t"
+    STATUS       current
+    DESCRIPTION ""
+    SYNTAX       OCTET STRING (SIZE (0..1024))
+       	
 clientBan OBJECT-TYPE
-	SYNTAX	OCTET STRING (SIZE(0..1024))
+	SYNTAX	VarnishBanString
 	MAX-ACCESS  read-write
 	STATUS      current
 	DESCRIPTION
@@ -527,8 +535,63 @@ bansPersistedFragmentation OBJECT-TYPE
 	DESCRIPTION
 		"Extra bytes in persisted ban lists due to fragmentation"
 	::= { bans 17 }
-	
 
+banTable OBJECT-TYPE
+       SYNTAX     SEQUENCE OF VarnishBanEntry
+       MAX-ACCESS not-accessible
+       STATUS     current
+       DESCRIPTION
+             "The (conceptual) table listing available bans"
+       ::= { bans 18 }
+
+varnishBanEntry OBJECT-TYPE
+       SYNTAX     VarnishBanEntry
+       MAX-ACCESS not-accessible
+       STATUS     current
+       DESCRIPTION
+             "An entry (conceptual row) representing a ban"
+       INDEX      { banIndex }
+       ::= { banTable 1 }
+
+VarnishBanEntry ::= SEQUENCE {
+       banIndex                           Integer32,
+       banTime				  DateAndTime,
+       banRefCount                        Counter64,
+       banExpression			  VarnishBanString
+}
+
+banIndex OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"A number uniquely identifying each ban"
+	::= { varnishBanEntry 1 }
+
+banTime OBJECT-TYPE
+	SYNTAX  DateAndTime
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Time when the ban was created"
+	::= { varnishBanEntry 2 }
+
+banRefCount OBJECT-TYPE
+	SYNTAX  Counter32
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of references to this ban"
+	::= { varnishBanEntry 3 }
+	
+banExpression OBJECT-TYPE
+	SYNTAX  VarnishBanString
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"VCL expression of the ban"
+	::= { varnishBanEntry 4 }
+	
 --
 -- Groups and Compliance
 --
@@ -585,8 +648,13 @@ varnishGroup OBJECT-GROUP
 		threadsCreated,
 		threadsDestroyed,
 		threadsFailed,
-		threadsQueueLength
-
+		threadsQueueLength,
+	        banTable,
+		varnishBanEntry,
+		banIndex,
+		banTime,
+		banRefCount,
+		banExpression
 		}
 
 	STATUS  current
@@ -602,8 +670,7 @@ varnishStandardComplianceV1 MODULE-COMPLIANCE
 		"Compliance for an Varnish agent"
 
 	MODULE 
-	MANDATORY-GROUPS {
-		varnishGroup}
+	MANDATORY-GROUPS { varnishGroup }
 
 	::= { varnishCompl 1 }
 
