@@ -13,7 +13,7 @@
 .\"
 .\" You should have received a copy of the GNU General Public License
 .\" along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
-.TH VARNISH-MIB 8 "November 27, 2014" "varnish-mib"
+.TH VARNISH-MIB 8 "November 28, 2014" "varnish-mib"
 .SH NAME
 varnish\-mib \- net-snmp module for obtaining Varnish Cache statistics
 .SH SYNOPSIS
@@ -61,6 +61,9 @@ It can also be set remotely by assigning new value to the
 \fBvarnishCLIPortTimeout\fR \fINUMBER\fR
 Sets timeout for I/O operations with Varnish administrative port.
 Default is 5 seconds.
+.TP
+\fBvarnishBackendTableTimeout\fR \fINUMBER\fR
+Update interval for \fBbackendTable\fR.  Default is 5 seconds.
 .SH OIDS
 The following OIDs are defined:
 .SS Branch \(dqclient\(dq
@@ -122,6 +125,55 @@ Number of unused backend connections.
 .TP
 .B backendConnRetry
 Backend connections retried.
+.TP
+.B backendRequests
+Total backend requests made.
+.TP
+.B backendTable
+This branch provides a conceptual table of backends with the
+corresponding statistics.  It is indexed by \fBvbeIndex\fR.  Each row
+has the following elements:
+.RS
+.TP
+.B vbeIdent
+A string uniqiely identifying the backend.
+.TP
+.B vbeIPv4
+IPv4 address of the backend.  Empty if the backend has no IPv4 address.
+.TP
+.B vbeIPv6
+IPv6 address of the backend.  Empty if the backend has no IPv6 address.
+.TP
+.B vbePort
+Port number.
+.TP
+.B vbeHappyProbes
+Number of successful health probes.
+.TP 
+.B vbeVcls
+Number of VCL references.
+.TP
+.B vbeRequestHeaderBytes
+Total number of request header bytes sent to that backend.
+.TP
+.B vbeRequestBodyBytes
+Total number of request body bytes sent to that backend.
+.TP
+.B vbeResponseHeaderBytes
+Total number of response header bytes received from that backend.
+.TP
+.B vbeResponseBodyBytes
+Total number of response body bytes received from that backend.
+.TP
+.B vbePipeHeaderBytes
+Total number of header bytes piped to that backend.
+.TP
+.B vbePipeIn
+Total number of bytes piped to that backend.
+.TP
+.B vbePipeOut
+Total number of bytes piped from that backend.
+.RE
 .SS Branch \(dqtotal\(dq
 .TP
 .B totalSessions
@@ -150,6 +202,15 @@ Total header bytes sent out in responses.
 .TP
 .B totalResponseBodyBytes
 Total body bytes sent out in responses.
+.TP
+.B totalPipeHeaderBytes
+Total request header bytes received for piped sessions.
+.TP
+.B totalPipeIn
+Total number of bytes forwarded from clients in pipe sessions.
+.TP
+.B totalPipeOut
+Total number of bytes forwarded to clients in pipe sessions.
 .SS Branch \(dqmaster\(dq
 .TP
 .B uptime

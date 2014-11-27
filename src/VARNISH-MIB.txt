@@ -14,18 +14,20 @@ IMPORTS
 		FROM SNMPv2-SMI
 	DateAndTime
 		FROM SNMPv2-TC
+	InetAddressIPv4, InetAddressIPv6, InetPortNumber,
+		FROM INET-ADDRESS-MIB
 	OBJECT-GROUP, MODULE-COMPLIANCE
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411261613Z"
+	LAST-UPDATED "201411280136Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "Morten Hermanrud <mhe@say.no>
 	              Sergey Poznyakoff <gray@gnu.org>
 		     "
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411261044Z"
+	REVISION "201411280136Z"
 	DESCRIPTION 
 		"Second revision."
 	::= { varnish 0 }
@@ -192,6 +194,168 @@ backendConnRetry OBJECT-TYPE
 	DESCRIPTION
 		"Backend connections retried."
 	::= { connections 8 }
+
+backendRequests OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total backend requests made."
+	::= { backend 2 }
+
+backendTable OBJECT-TYPE
+	SYNTAX	SEQUENCE OF VarnishBackendEntry
+	MAX-ACCESS not-accessible
+	STATUS	current
+	DESCRIPTION
+		"A table of configured backends and their statistics"
+	::= { backend 3 }
+
+varnishBackendEntry OBJECT-TYPE
+	SYNTAX	VarnishBackendEntry
+	MAX-ACCESS not-accessible
+	STATUS	current
+	DESCRIPTION
+		"An entry (conceptual row) describing a backend."
+	INDEX	{ vbeIndex }
+	::= { backendTable 1 }
+
+VarnishBackendIdentString ::= TEXTUAL-CONVENTION
+    DISPLAY-HINT "256t"
+    STATUS       current
+    DESCRIPTION "An identifier of a Varnish backend."
+    SYNTAX       OCTET STRING (SIZE (0..256))
+	
+varnishBackendEntry ::= SEQUENCE {
+	vbeIndex		Integer32,
+	vbeIdent		VarnishBackendIdentString,
+	vbeIPv4                 InetAddressIPv4,
+	vbeIPv6                 InetAddressIPv6,
+	vbePort			InetPortNumber,
+	vbeHappyProbes		Counter64,
+	vbeVcls	                Counter64,
+	vbeRequestHeaderBytes	Counter64,
+	vbeRequestBodyBytes	Counter64,
+	vbeResponseHeaderBytes	Counter64,
+	vbeResponseBodyBytes	Counter64,
+	vbePipeHeaderBytes	Counter64,
+	vbePipeIn		Counter64,
+	vbePipeOut		Counter64
+}
+
+vbeIndex OBJECT-TYPE
+	SYNTAX  Integer32
+	MAX-ACCESS not-accessible
+	STATUS  current
+	DESCRIPTION
+		"A number uniquely identifying each backend."
+	::= { varnishBackendEntry 1 }
+
+vbeIdent OBJECT-TYPE
+	SYNTAX  VarnishBackendIdentString
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Textual identifier of the backend."
+	::= { varnishBackendEntry 2 }
+
+vbeIPv4 OBJECT-TYPE
+	SYNTAX  InetAddressIPv4
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"IPv4 address of the backend.  Empty if the backend has no
+		 IPv4 address."
+	::= { varnishBackendEntry 3 }
+                 
+vbeIPv6 OBJECT-TYPE
+	SYNTAX InetAddressIPv6 
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"IPv6 address of the backend.  Empty if the backend has no
+		 IPv6 address."
+	::= { varnishBackendEntry 4 }
+                 
+vbePort OBJECT-TYPE
+	SYNTAX  InetPortNumber
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Port number."
+	::= { varnishBackendEntry 5 }
+	
+vbeHappyProbes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of successful health probes."
+	::= { varnishBackendEntry 6 }
+		
+vbeVcls OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Number of VCL references."
+	::= { varnishBackendEntry 7 }
+
+vbeRequestHeaderBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of request header bytes sent to that backend."
+	::= { varnishBackendEntry 8 }
+	
+vbeRequestBodyBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of request body bytes sent to that backend."
+	::= { varnishBackendEntry 9 }
+	
+vbeResponseHeaderBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of response header bytes received from that backend."
+	::= { varnishBackendEntry 10 }
+	
+vbeResponseBodyBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of response body bytes received from that backend."
+	::= { varnishBackendEntry 11 }
+	
+vbePipeHeaderBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of header bytes piped to that backend."
+	::= { varnishBackendEntry 12 }
+	
+vbePipeIn OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of bytes piped to that backend."
+	::= { varnishBackendEntry 13 }
+		
+vbePipeOut OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of bytes piped from that backend."
+	::= { varnishBackendEntry 14 }
 	
 totalSessions OBJECT-TYPE
 	SYNTAX  Counter64
@@ -265,6 +429,30 @@ totalResponseBodyBytes OBJECT-TYPE
 		"Total response body bytes."
 	::= { total 9 }
 
+totalPipeHeaderBytes OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total request header bytes received for piped sessions."
+	::= { total 10 }
+	
+totalPipeIn OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of bytes forwarded from clients in pipe sessions."
+	::= { total 11 }
+	
+totalPipeOut OBJECT-TYPE
+	SYNTAX  Counter64
+	MAX-ACCESS read-only
+	STATUS  current
+	DESCRIPTION
+		"Total number of bytes forwarded to clients in pipe sessions."
+	::= { total 12 }
+	
 uptime OBJECT-TYPE
 	SYNTAX	TimeTicks
 	MAX-ACCESS read-only
@@ -630,6 +818,20 @@ varnishGroup OBJECT-GROUP
 		backendConnRecycled,
 		backendConnUnused,
 		backendConnRetry,
+		backendRequests,
+		varnishBackendEntry,
+		vbeIPv4,
+		vbeIPv6,
+		vbePort,
+		vbeHappyProbes,
+		vbeVcls,
+		vbeRequestHeaderBytes,
+		vbeRequestBodyBytes,
+		vbeResponseHeaderBytes,
+		vbeResponseBodyBytes,
+		vbePipeHeaderBytes,
+		vbePipeIn,
+		vbePipeOut,
 		totalSessions,
 		totalRequests,
 		totalPipe,
@@ -639,11 +841,13 @@ varnishGroup OBJECT-GROUP
 		clientRequests411,
 		clientRequests413,
 		clientRequests417,
-		backendConnRetry,
 		totalRequestHeaderBytes,
 		totalRequestBodyBytes,
 		totalResponseHeaderBytes,
 		totalResponseBodyBytes,
+		totalPipeHeaderBytes,
+		totalPipeIn,
+		totalPipeOut,
 		uptime,
 		sessAccepted,
 		sessQueued,

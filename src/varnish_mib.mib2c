@@ -51,6 +51,7 @@ $vars{'varnish_translate'} = sub {
 	backendConnRecycled       => [ 'MAIN', 'backend_recycle' ],
 	backendConnUnused         => [ 'MAIN', 'backend_toolate' ],
 	backendConnRetry          => [ 'MAIN', 'backend_retry' ],
+	backendRequests           => [ 'MAIN', 'backend_req' ],
 	
 	totalSessions             => [ 'MAIN', 's_sess' ],
 	totalRequests             => [ 'MAIN', 's_req' ],
@@ -61,7 +62,10 @@ $vars{'varnish_translate'} = sub {
 	totalRequestBodyBytes     => [ 'MAIN', 's_req_bodybytes' ],
 	totalResponseHeaderBytes  => [ 'MAIN', 's_resp_hdrbytes' ],
 	totalResponseBodyBytes    => [ 'MAIN', 's_resp_bodybytes' ],
-
+        totalPipeHeaderBytes      => [ 'MAIN', 's_pipe_hdrbytes' ],
+	totalPipeIn               => [ 'MAIN', 's_pipe_in' ],
+	totalPipeOut              => [ 'MAIN', 's_pipe_out' ],
+	
 	sessAccepted              => [ 'MAIN', 'sess_conn'],
 	sessQueued                => [ 'MAIN', 'sess_queued'],
 	sessDropped               => [ 'MAIN', 'sess_dropped'], 
@@ -120,6 +124,17 @@ $vars{'varnish_translate'} = sub {
     return 0;
 };
 
+%field_dim_tab = (
+	vbeIPv4 => 4,
+	vbeIPv6 => 16
+);
+
+$vars{'set_field_dim'} = sub {
+	my $v = shift;
+	$vars{field_dim} = $field_dim_tab{$v};
+        return 0;
+};
+
 $vars{'modulename'} = $vars{'name'};
 $vars{'modulename'} =~ s#.*/##;
 $vars{'modulename'} =~ s/\.c$//;
@@ -130,6 +145,7 @@ $vars{'modulename'} =~ s/\.c$//;
 @open ${modulename}.h@
 /* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
 #include <config.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -169,13 +185,14 @@ int varnish_ban(netsnmp_agent_request_info   *reqinfo,
 int varnish_mib_timeout_parser(const char *token, char *line,
 			       unsigned *retval);
 
-extern unsigned banTable_timeout;
 void varnish_ban_table_timeout_parser(const char *token, char *line);
 void varnish_vcli_timeout_parser(const char *token, char *line);
 
 int varnish_ban_table_timeout_set(netsnmp_agent_request_info   *reqinfo,
 				  netsnmp_request_info         *requests,
 				  struct VSM_data *vd);
+
+void varnish_backend_table_timeout_parser(const char *token, char *line);
 
 @open ${name}@
 /* THIS FILE IS GENERATED AUTOMATICALLY.  PLEASE DO NOT EDIT. */
@@ -381,7 +398,14 @@ struct ${i}_entry {
     /* Index values */
     @foreach $idx index@
      @if $idx.needlength@
+      @startperl@
+      &{$vars{'set_field_dim'}}($vars{'idx'});
+      @endperl@
+      @if $field_dim > 0@
+    $idx.decl $idx[$field_dim];
+      @else@
     $idx.decl *$idx;
+      @end@
     size_t ${idx}_len;
      @else@
     $idx.decl $idx;
@@ -392,7 +416,14 @@ struct ${i}_entry {
     @foreach $c nonindex@
      @if $c.readable@
       @if $c.needlength@
+      @startperl@
+      &{$vars{'set_field_dim'}}($vars{'c'});
+      @endperl@
+      @if $field_dim > 0@
+    $c.decl ${c}[$field_dim];
+      @else@
     $c.decl *$c;
+      @end@
     size_t ${c}_len;
       @else@
     $c.decl $c;
@@ -401,6 +432,7 @@ struct ${i}_entry {
     @end@
 };
 
+extern unsigned ${i}_timeout;
 int ${i}_load(netsnmp_cache *cache, void *vmagic);
 void ${i}_free(netsnmp_cache *cache, void *vmagic);
 @pop@
@@ -437,6 +469,10 @@ handle_table_${i}(
                 snmp_set_var_typed_value(request->requestvb, $c.type,
                                          table_entry->$c,
                                          table_entry->${c}_len);
+                @elsif $c.type eq 'ASN_COUNTER64'@@
+	        snmp_set_var_typed_value(requests->requestvb, $c.type,
+				         &table_entry->$c,
+				         sizeof(table_entry->$c));
                 @else@
                 snmp_set_var_typed_integer(request->requestvb, $c.type,
                                            table_entry->$c);
@@ -531,6 +567,12 @@ init_$modulename(void)
 			       "varnishBanTableTimeout SECONDS"))
 	  snmp_log(LOG_ERR,"can't register config handler\n");
 
+  if (!register_config_handler("snmpd", "varnishBackendTableTimeout",
+			       varnish_backend_table_timeout_parser,
+			       NULL,
+			       "varnishBackendTableTimeout SECONDS"))
+	  snmp_log(LOG_ERR,"can't register config handler\n");
+  
   if (!register_config_handler("snmpd", "varnishCLIPortTimeout",
 			       varnish_vcli_timeout_parser,
 			       NULL,

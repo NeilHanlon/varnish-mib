@@ -20,6 +20,7 @@ dlmod_LTLIBRARIES = varnish-mib.la
 varnish_mib_la_SOURCES = \
  auth.c\
  ban.c\
+ betab.c\
  sha256.c\
  sha256.h\
  varnish_mib.c\
@@ -37,7 +38,7 @@ varnish_mib.c varnish_mib.h: varnish_mib.mib2c VARNISH-MIB.txt
 	 mib2c -c $< -f $@ varnish
 
 #NET_SNMP_INCLUDES = `$(NET_SNMP_CONFIG) --cflags`
-NET_SNMP_INCLUDES =
+#NET_SNMP_INCLUDES =
 NET_SNMP_LIBS = `$(NET_SNMP_CONFIG) --libs`
 NET_SNMP_EXLIBS = `$(NET_SNMP_CONFIG) --external-libs`
 NET_SNMP_MIBDIRS = `net-snmp-config --mibdirs`
@@ -51,7 +52,7 @@ AM_LDFLAGS = \
  $(NET_SNMP_LIBS)\
  $(NET_SNMP_EXLIBS)
 
-AM_CPPFLAGS=-I. ${VARNISHAPI_CFLAGS} -I$NET_SNMP_INCLUDES
+AM_CPPFLAGS=-I. ${VARNISHAPI_CFLAGS}
 
 mibdir=@MIBDIR@
 mib_DATA = varnish_mib.mib2c
