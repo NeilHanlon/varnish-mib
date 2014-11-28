@@ -13,7 +13,8 @@ manpage.
 * Overview
 
 Varnish-mib is a dynamically loadable object module for net-snmp
-snmpd, that provides access to Varnish Cache statistics.
+snmpd, that provides access to Varnish Cache statistics.  It uses
+MIBs from varnishsnmp project (http://varnishsnmp.sourceforge.net).
 
 * Installation
 
