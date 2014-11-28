@@ -17,7 +17,6 @@
 
 #include "varnish_mib.h"
 #include <ctype.h>
-#include <limits.h>
 
 static int
 send_ban_cmd(vcli_conn_t *conn, const char *expr)

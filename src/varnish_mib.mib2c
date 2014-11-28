@@ -144,6 +144,7 @@ $vars{'modulename'} =~ s/\.c$//;
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <limits.h>
 
 #include <vapi/vsc.h>
 #include <vapi/vsm.h>
