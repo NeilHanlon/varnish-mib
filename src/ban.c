@@ -99,20 +99,6 @@ varnish_ban_table_timeout_parser(const char *token, char *line)
 	varnish_mib_timeout_parser(token, line, &banTable_timeout);
 }
 
-int
-varnish_ban_table_timeout_set(netsnmp_agent_request_info   *reqinfo,
-			      netsnmp_request_info         *requests,
-			      struct VSM_data *vd)
-{
-	if (*requests->requestvb->val.integer < 0 ||
-	    *requests->requestvb->val.integer > UINT_MAX)
-		return SNMP_ERR_BADVALUE;
-	DEBUGMSGTL(("varnish_ban", "setting banTable timeout %ld\n",
-		    *requests->requestvb->val.integer));
-	banTable_timeout = *requests->requestvb->val.integer;
-	return SNMP_ERR_NOERROR;
-}
-
 /*
  * create a new row in the table 
  */

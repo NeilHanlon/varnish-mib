@@ -101,10 +101,6 @@ $vars{'varnish_translate'} = sub {
 	bansLurkerContention      => [ 'MAIN', 'bans_lurker_contention' ],
 	bansPersistedBytes        => [ 'MAIN', 'bans_persisted_bytes' ],
 	bansPersistedFragmentation => [ 'MAIN', 'bans_persisted_fragmentation' ],
-
-	banTableTimeout           => [ 'VAR', 'banTable_timeout',
-	               { varnish_set_action => 'varnish_ban_table_timeout_set'
-		       }  ],
 				       
 	);
 
@@ -187,10 +183,6 @@ int varnish_mib_timeout_parser(const char *token, char *line,
 
 void varnish_ban_table_timeout_parser(const char *token, char *line);
 void varnish_vcli_timeout_parser(const char *token, char *line);
-
-int varnish_ban_table_timeout_set(netsnmp_agent_request_info   *reqinfo,
-				  netsnmp_request_info         *requests,
-				  struct VSM_data *vd);
 
 void varnish_backend_table_timeout_parser(const char *token, char *line);
 

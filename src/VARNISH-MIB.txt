@@ -20,14 +20,14 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411280136Z"
+	LAST-UPDATED "201411280837Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "Morten Hermanrud <mhe@say.no>
 	              Sergey Poznyakoff <gray@gnu.org>
 		     "
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411280136Z"
+	REVISION "201411280837Z"
 	DESCRIPTION 
 		"Second revision."
 	::= { varnish 0 }
@@ -783,15 +783,6 @@ banExpression OBJECT-TYPE
 		"VCL expression of the ban."
 	::= { varnishBanEntry 4 }
 
-banTableTimeout OBJECT-TYPE
-	SYNTAX	Unsigned32
-	MAX-ACCESS read-write
-	STATUS	current
-	DESCRIPTION
-		"If banTable content is cached, this variable keeps
-		 the time in seconds after which the table is reloaded.
-		 Setting it changes that value."
-	::= { agent 1 }
 --
 -- Groups and Compliance
 --

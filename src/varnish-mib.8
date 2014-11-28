@@ -54,9 +54,6 @@ command.  To minimize the performance impact, the information obtained
 is cached for a predefined amount of time (60 seconds by default).
 This amount (in seconds) is configured by \fBvarnishBanTableTimeout\fR
 statement.
-
-It can also be set remotely by assigning new value to the
-\fBbanTableTimeout\fR oid.
 .TP
 \fBvarnishCLIPortTimeout\fR \fINUMBER\fR
 Sets timeout for I/O operations with Varnish administrative port.
@@ -335,14 +332,11 @@ VCL expression of the ban.
 Notice that for performance reasons, the ban table is cached, so the
 total number of rows in the \fBbanTable\fR may diverge from the value
 of \fBbansTotal\fR variable.  The default update interval is 60
-seconds.  It can be configured either in the \fBsnmpd.conf\fR file
-(see the \fBvarnishBanTableTimeout\fR statement above), or via
-the \fBbanTableTimeout\fR variable.
+seconds.  It can be configured in the \fBsnmpd.conf\fR file
+(see the \fBvarnishBanTableTimeout\fR statement above).
 .SS Branch \(dqagent\(dq
-.TP
-.B banTableTimeout
-Update interval for the \fBbanTable\fR cache.  If set, it takes effect
-immediately.
+The \fBagent\fR branch is reserved for OIDs for
+implementation-specific management.  It is not used currently.
 .SH "SEE ALSO"
 .BR snmpd.conf (5),
 .BR snmpd (8),
