@@ -231,11 +231,11 @@ backendTable_load(netsnmp_cache *cache, void *vmagic)
 	bp.table = (netsnmp_tdata *) vmagic;
 	memset(&bp.ent, 0, sizeof(bp.ent));
 
-	DEBUGMSGTL(("varnish_ban", "loading backend table"));
+	DEBUGMSGTL(("varnish_ban", "loading backend table\n"));
 	VSC_Iter(vd, NULL, create_entry_cb, &bp);
 	/* FIXME: perhaps handle bp.err separately */
 	if (bp.idx != -1) {
-		DEBUGMSGTL(("varnish_ban", "loaded %lu backend entries",
+		DEBUGMSGTL(("varnish_ban", "loaded %lu backend entries\n",
 			    bp.idx + 1));
 		if (!create_entry(bp.table, bp.idx, &bp.ent))
 			snmp_log(LOG_ERR, "out of memory\n");
@@ -249,7 +249,7 @@ backendTable_free(netsnmp_cache *cache, void *vmagic)
 	netsnmp_tdata  *table = (netsnmp_tdata *) vmagic;
 	netsnmp_tdata_row *row;
 
-	DEBUGMSGTL(("varnish_ban", "freeing backend table"));
+	DEBUGMSGTL(("varnish_ban", "freeing backend table\n"));
 	while ((row = netsnmp_tdata_row_first(table))) {
 		struct backendTable_entry *entry = row->data;
 		free(entry->vbeIdent);

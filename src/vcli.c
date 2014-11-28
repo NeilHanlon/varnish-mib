@@ -146,7 +146,7 @@ vcli_read(struct vcli_conn *conn, size_t size)
 		if (conn->bufsize == 0)
 			ret = -1;
 		conn->base[conn->bufsize] = 0;
-		DEBUGMSGTL(("vcli_mib", "<<varnish: %s\n", conn->base));
+		DEBUGMSGTL(("varnish_mib:vcli", "<<varnish: %s\n", conn->base));
 	}
 	
 	return ret;
@@ -229,7 +229,7 @@ vcli_write(struct vcli_conn *conn)
 {
 	size_t size;
 
-	DEBUGMSGTL(("vcli_mib", ">>varnish: %s\n", conn->base));
+	DEBUGMSGTL(("varnish_mib:vcli", ">>varnish: %s\n", conn->base));
 	for (size = 0; size < conn->bufsize; ) {
 		int n = write(conn->fd, conn->base + size,
 			      conn->bufsize - size);
@@ -439,7 +439,7 @@ vcli_connect(struct VSM_data *vd, struct vcli_conn *conn)
                 snmp_log(LOG_ERR, "no -T arg in shared memory\n");
                 return SNMP_ERR_GENERR;
         }
-	DEBUGMSGTL(("vcli_mib", "-T '%s'\n", vt.b));
+	DEBUGMSGTL(("varnish_mib:vcli", "-T '%s'\n", vt.b));
 	
 	s = strdup(vt.b);
 	if (!s) {
@@ -489,7 +489,7 @@ vcli_connect(struct VSM_data *vd, struct vcli_conn *conn)
                 snmp_log(LOG_ERR, "no -S arg in shared memory\n");
                 return SNMP_ERR_GENERR;
         }
-	DEBUGMSGTL(("vcli_mib", "-S '%s'\n", vt.b));
+	DEBUGMSGTL(("varnish_mib:vcli", "-S '%s'\n", vt.b));
 	s = strdup(vt.b);
 	if (!s) {
                 snmp_log(LOG_ERR, "out of memory\n");

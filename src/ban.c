@@ -153,7 +153,7 @@ banTable_load(netsnmp_cache *cache, void *vmagic)
 	char *p;
 	struct VSM_data *vd;
 	
-	DEBUGMSGTL(("varnish_ban", "reloading ban table"));
+	DEBUGMSGTL(("varnish_ban", "reloading ban table\n"));
 	vd = varnish_get_vsm_data();
 	rc = vcli_connect(vd, &conn);
 	if (rc != SNMP_ERR_NOERROR)
@@ -263,7 +263,7 @@ banTable_load(netsnmp_cache *cache, void *vmagic)
 		p = q;
 	}
 	vcli_disconnect(&conn);
-	DEBUGMSGTL(("varnish_ban", "loaded %ld ban entries", idx));
+	DEBUGMSGTL(("varnish_ban", "loaded %ld ban entries\n", idx));
 	return 0;
 }
 
@@ -273,7 +273,7 @@ banTable_free(netsnmp_cache *cache, void *vmagic)
 	netsnmp_tdata  *table = (netsnmp_tdata *) vmagic;
 	netsnmp_tdata_row *row;
 
-	DEBUGMSGTL(("varnish_ban", "freeing ban table"));
+	DEBUGMSGTL(("varnish_ban", "freeing ban table\n"));
 	while ((row = netsnmp_tdata_row_first(table))) {
 		struct banTable_entry *entry = row->data;
 		free(entry->banExpression);

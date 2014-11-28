@@ -501,7 +501,7 @@ initialize_table_$i(void)
     netsnmp_table_registration_info *table_info;
     netsnmp_cache                   *cache;
 
-    DEBUGMSGTL(("${name}:init", "initializing table $i\n"));
+    DEBUGMSGTL(("${modulename}", "initializing table $i\n"));
 
     reg = netsnmp_create_handler_registration("$i", handle_table_${i},
 	                                      ${i}_oid, ${i}_oid_len,
