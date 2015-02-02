@@ -1,5 +1,5 @@
 # This file is part of Varnish-mib -*- autoconf -*-
-# Copyright (C) 2014 Sergey Poznyakoff
+# Copyright (C) 2014-2015 Sergey Poznyakoff
 #
 # Varnish-mib is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 # along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ(2.69)
-AC_INIT([varnish-mib], 1.0, [gray@gnu.org])
+AC_INIT([varnish-mib], 1.0.90, [gray@gnu.org])
 AC_CONFIG_SRCDIR(src/varnish_mib.mib2c)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR([build-aux])

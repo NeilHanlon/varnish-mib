@@ -223,9 +223,12 @@ create_entry_cb(void *priv, const struct VSC_point *const pt)
 int
 backendTable_load(netsnmp_cache *cache, void *vmagic)
 {
-	struct VSM_data *vd = varnish_get_vsm_data();
 	struct betab_priv bp;
+	struct VSM_data *vd = varnish_get_vsm_data();
 
+	if (!vd)
+		return SNMP_ERR_NOSUCHNAME;
+	
 	bp.idx = -1;
 	bp.err = 0;
 	bp.table = (netsnmp_tdata *) vmagic;

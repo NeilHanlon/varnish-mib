@@ -1,5 +1,5 @@
 /* This file is part of varnish-mib -*- c -*-
-   Copyright (C) 2014 Sergey Poznyakoff
+   Copyright (C) 2014-2015 Sergey Poznyakoff
 
    Varnish-mib is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -155,9 +155,11 @@ banTable_load(netsnmp_cache *cache, void *vmagic)
 	
 	DEBUGMSGTL(("varnish_ban", "reloading ban table\n"));
 	vd = varnish_get_vsm_data();
+	if (!vd)
+		return SNMP_ERR_NOSUCHNAME;
 	rc = vcli_connect(vd, &conn);
 	if (rc != SNMP_ERR_NOERROR)
-	    return rc;
+		return rc;
 	
 	if (vcli_asprintf(&conn, "ban.list\n") || vcli_write(&conn))
 		return SNMP_ERR_GENERR;
