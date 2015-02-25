@@ -1,10 +1,10 @@
-Varnish-mib NEWS -- history of user-visible changes. 2015-02-02
+Varnish-mib NEWS -- history of user-visible changes. 2015-02-25
 Copyright (C) 2014-2015 Sergey Poznyakoff
 See the end of file for copying conditions.
 
 Please send Varnish-mib bug reports to <gray@gnu.org>
 
-Version 1.0.90 (Git)
+Version 1.1, 2015-02-25
 
 * Don't exit if unable to open Varnish memory file 
 
