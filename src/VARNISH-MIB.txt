@@ -14,7 +14,7 @@ IMPORTS
 		FROM SNMPv2-SMI
 	DateAndTime
 		FROM SNMPv2-TC
-	InetAddressIPv4, InetAddressIPv6, InetPortNumber,
+	InetAddressIPv4, InetAddressIPv6, InetPortNumber
 		FROM INET-ADDRESS-MIB
 	OBJECT-GROUP, MODULE-COMPLIANCE
 		FROM SNMPv2-CONF;

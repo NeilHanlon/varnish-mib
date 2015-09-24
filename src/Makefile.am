@@ -55,7 +55,7 @@ AM_LDFLAGS = \
 AM_CPPFLAGS=-I. ${VARNISHAPI_CFLAGS}
 
 mibdir=@MIBDIR@
-mib_DATA = varnish_mib.mib2c
+mib_DATA = VARNISH-MIB.txt
 
 dist_man_MANS = varnish-mib.8
 

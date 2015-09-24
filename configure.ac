@@ -67,7 +67,7 @@ AC_ARG_WITH([dlmoddir],
   *)  AC_MSG_ERROR([argument to --with-dlmoddir must be absolute pathname])
   esac])
 
-AC_SUBST([MIBDIR],['$(datarootdir)/snmp'])
+AC_SUBST([MIBDIR],['$(datarootdir)/snmp/mibs'])
 AC_ARG_WITH([mibdir],
  [AC_HELP_STRING([--with-mibdir=DIR],
                  [installation directory for MIB files])],
