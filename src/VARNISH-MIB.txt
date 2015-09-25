@@ -10,9 +10,9 @@ VARNISH-MIB DEFINITIONS ::= BEGIN
 
 IMPORTS
 	MODULE-IDENTITY, OBJECT-TYPE, enterprises, Counter64, TimeTicks,
-	Unsigned32
+	Counter32, Integer32
 		FROM SNMPv2-SMI
-	DateAndTime
+	TEXTUAL-CONVENTION, DateAndTime
 		FROM SNMPv2-TC
 	InetAddressIPv4, InetAddressIPv6, InetPortNumber
 		FROM INET-ADDRESS-MIB
@@ -20,14 +20,14 @@ IMPORTS
 		FROM SNMPv2-CONF;
 
 varnishMIB MODULE-IDENTITY
-	LAST-UPDATED "201411280837Z"
+	LAST-UPDATED "201509250838Z"
 	ORGANIZATION "Shared Autonomous sYstems"
 	CONTACT-INFO "Morten Hermanrud <mhe@say.no>
 	              Sergey Poznyakoff <gray@gnu.org>
 		     "
 	DESCRIPTION 
 		"This MIB module defines objects for Varnish reverse web proxy."
-	REVISION "201411280837Z"
+	REVISION "201509250838Z"
 	DESCRIPTION 
 		"Second revision."
 	::= { varnish 0 }
@@ -226,7 +226,7 @@ VarnishBackendIdentString ::= TEXTUAL-CONVENTION
     DESCRIPTION "An identifier of a Varnish backend."
     SYNTAX       OCTET STRING (SIZE (0..256))
 	
-varnishBackendEntry ::= SEQUENCE {
+VarnishBackendEntry ::= SEQUENCE {
 	vbeIndex		Integer32,
 	vbeIdent		VarnishBackendIdentString,
 	vbeIPv4                 InetAddressIPv4,
@@ -244,7 +244,7 @@ varnishBackendEntry ::= SEQUENCE {
 }
 
 vbeIndex OBJECT-TYPE
-	SYNTAX  Integer32
+	SYNTAX  Integer32 (0..65535)
 	MAX-ACCESS not-accessible
 	STATUS  current
 	DESCRIPTION
@@ -747,12 +747,12 @@ varnishBanEntry OBJECT-TYPE
 VarnishBanEntry ::= SEQUENCE {
        banIndex                           Integer32,
        banTime				  DateAndTime,
-       banRefCount                        Counter64,
+       banRefCount                        Counter32,
        banExpression			  VarnishBanString
 }
 
 banIndex OBJECT-TYPE
-	SYNTAX  Integer32
+	SYNTAX  Integer32 (0..65535)
 	MAX-ACCESS not-accessible
 	STATUS  current
 	DESCRIPTION
@@ -810,7 +810,6 @@ varnishGroup OBJECT-GROUP
 		backendConnUnused,
 		backendConnRetry,
 		backendRequests,
-		varnishBackendEntry,
 		vbeIPv4,
 		vbeIPv6,
 		vbePort,
@@ -857,9 +856,6 @@ varnishGroup OBJECT-GROUP
 		threadsDestroyed,
 		threadsFailed,
 		threadsQueueLength,
-	        banTable,
-		varnishBanEntry,
-		banIndex,
 		banTime,
 		banRefCount,
 		banExpression
