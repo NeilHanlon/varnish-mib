@@ -1,8 +1,13 @@
-Varnish-mib NEWS -- history of user-visible changes. 2015-02-25
-Copyright (C) 2014-2015 Sergey Poznyakoff
+Varnish-mib NEWS -- history of user-visible changes. 2016-04-27
+Copyright (C) 2014-2016 Sergey Poznyakoff
 See the end of file for copying conditions.
 
 Please send Varnish-mib bug reports to <gray@gnu.org>
+
+Version 1.1.90 (Git)
+
+* Support for Varnish 4.1
+
 
 Version 1.1, 2015-02-25
 
@@ -16,7 +21,7 @@ Initial release.
 
 * Copyright information:
 
-Copyright (C) 2014-2015 Sergey Poznyakoff
+Copyright (C) 2014-2016 Sergey Poznyakoff
 
    Permission is granted to anyone to make or distribute verbatim copies
    of this document as received, in any medium, provided that the

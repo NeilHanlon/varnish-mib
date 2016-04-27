@@ -59,7 +59,13 @@ create_entry(netsnmp_tdata *table_data, long idx,
 #define VSC_POINT_TYPE(p) ((p)->section->fantom->type)
 #define VSC_POINT_IDENT(p) ((p)->section->fantom->ident)
 #define VSC_POINT_NAME(p) ((p)->desc->name)
-#define VSC_POINT_FMT(p) ((p)->desc->fmt)
+#if VARNISHAPI_MINOR == 0
+# define VSC_POINT_FMT(p) ((p)->desc->fmt)
+#elif VARNISHAPI_MINOR == 1
+# define VSC_POINT_FMT(p) ((p)->desc->ctype)
+#else
+# error "unsupported Varnish API minor number"
+#endif
 
 struct betab_priv {
 	int err;

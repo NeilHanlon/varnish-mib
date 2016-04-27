@@ -1,5 +1,5 @@
 # This file is part of varnish-mib -*- c -*-
-# Copyright (C) 2014-2015 Sergey Poznyakoff
+# Copyright (C) 2014-2016 Sergey Poznyakoff
 #
 # Varnish-mib is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,9 +24,7 @@
 */
 @enddefine@
 @startperl@
-$vars{'varnish_translate'} = sub {
-    my $name = shift;
-    my %trans = (
+$vars{'varnish_translate_table'} = {
         uptime                    => [ 'MAIN', 'uptime' ],
 	clientAcceptedConnections => [ 'MAIN', 'sess_conn' ],
 	clientRequestsReceived    => [ 'MAIN', 'client_req' ],
@@ -102,9 +100,12 @@ $vars{'varnish_translate'} = sub {
 	bansPersistedBytes        => [ 'MAIN', 'bans_persisted_bytes' ],
 	bansPersistedFragmentation => [ 'MAIN', 'bans_persisted_fragmentation' ],
 				       
-	);
+};
 
-    my $r = $trans{$name};
+$vars{'varnish_translate'} = sub {
+    my $name = shift;
+
+    my $r = $vars{'varnish_translate_table'}->{$name};
     if (!defined($r)) {
 	print STDERR "no translation for $name!\n";
 	exit(1);
@@ -116,6 +117,13 @@ $vars{'varnish_translate'} = sub {
 	@vars{keys %{$r->[2]}} = values %{$r->[2]};
     } else {
 	delete $vars{$setkw};
+    }
+    if ($vars{'varnish_type'} eq 'MAIN') {
+	    $vars{'varnish_if'} = "#if HAVE_STRUCT_VSC_C_MAIN_" . uc($vars{'varnish_member'});
+	    $vars{'varnish_endif'} = '#endif';
+    } else {
+	    delete $vars{'varnish_if'};
+	    delete $vars{'varnish_endif'}
     }
     return 0;
 };
@@ -224,6 +232,10 @@ varnish_get_vsm_data()
 */
 
 @foreach $i scalar@
+  @startperl@
+    &{$vars{'varnish_translate'}}($vars{'i'});
+  @endperl@
+$varnish_if
 static int
 handle_$i(netsnmp_mib_handler *handler,
                           netsnmp_handler_registration *reginfo,
@@ -234,10 +246,6 @@ handle_$i(netsnmp_mib_handler *handler,
     int ret;
   @end@
     
-  @startperl@
-    &{$vars{'varnish_translate'}}($vars{'i'});
-  @endperl@
-
     if (!varnish_get_vsm_data())
         return SNMP_ERR_NOSUCHNAME;
   
@@ -359,6 +367,7 @@ handle_$i(netsnmp_mib_handler *handler,
     
     return SNMP_ERR_NOERROR;
 }
+$varnish_endif
 @end@
 
 @foreach $i table@
@@ -543,7 +552,12 @@ void
 init_$modulename(void)
 {
   @foreach $i scalar@
+    @startperl@
+      &{$vars{'varnish_translate'}}($vars{'i'});
+    @endperl@
+$varnish_if
     const oid ${i}_oid[] = { $i.commaoid };
+$varnish_endif
   @end@
 
   DEBUGMSGTL(("$modulename", "Initializing\n"));
@@ -567,6 +581,10 @@ init_$modulename(void)
 	  snmp_log(LOG_ERR,"can't register config handler\n");
   
   @foreach $i scalar@
+    @startperl@
+      &{$vars{'varnish_translate'}}($vars{'i'});
+    @endperl@
+$varnish_if
     netsnmp_register_scalar(
         netsnmp_create_handler_registration("$i", handle_$i,
                                ${i}_oid, OID_LENGTH(${i}_oid),
@@ -577,6 +595,7 @@ init_$modulename(void)
                                HANDLER_CAN_RWRITE
     @end@
         ));
+$varnish_endif    
   @end@
   @foreach $i table@
     initialize_table_$i();

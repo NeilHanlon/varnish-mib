@@ -1,5 +1,5 @@
 .\" This file is part of Varnish-mib -*- nroff -*-
-.\" Copyright (C) 2014-2015 Sergey Poznyakoff
+.\" Copyright (C) 2014-2016 Sergey Poznyakoff
 .\"
 .\" Varnish-mib is free software; you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License as published by
@@ -13,7 +13,7 @@
 .\"
 .\" You should have received a copy of the GNU General Public License
 .\" along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
-.TH VARNISH-MIB 8 "November 28, 2014" "varnish-mib"
+.TH VARNISH-MIB 8 "April 27, 2016" "varnish-mib"
 .SH NAME
 varnish\-mib \- net-snmp module for obtaining Varnish Cache statistics
 .SH SYNOPSIS
@@ -27,15 +27,24 @@ that provides access to Varnish Cache statistics.  The module is
 loaded into
 .BR snmpd (8)
 as shown above (actual path can of course differ, depending on how
-the package was configured).
+the package was configured).  Varnish version \fB4.0\fR and \fB4.1\fR
+are supported.
+.PP
+When using with \fBVarnish\fR version \fB4.1\fR, make sure the
+\fB_.vsm\fR file is readable for \fBsnmpd\fR.  This file is normally
+located in \fB/var/lib/varnish/\fIHOSTNAME\fR and has mode \fB640\fR.
+Its owner is determined by the \fB\-j\fR (\fB\-\-jail\fR)
+\fBvarnishd\fR option.  There are two ways to ensure it is readable:
+either make sure \fBsnmpd\fR and \fBvarnishd\fR run with the same user
+group, or use \fBsetfacl\fR(1) to tune access to that file.
 .PP
 The module obtains most of the data using Varnish API.  Information
 about available bans (\fBbanTable\fR subtree) as well as the mechanism
 for setting bans (\fBclientBan\fR OID) are implemented via \fBvarnishd\fR
 administrative interface.  For these to work, the module must have 
 read access to Varnish secret file.  In other words, the secret file
-must be readable either by the user \fBsnmpd\fR runs as, or by one
-of this user's groups.
+must be readable either by the user \fBsnmpd\fR runs as, or by its
+group.
 .SH CONFIGURATION OPTIONS
 Configuration statements specific to
 .B varnish\-mib
@@ -93,6 +102,17 @@ passes the request to the backend and this decision itself has been cached.
 Number of misses.  A cache miss indicates the object was fetched from
 the backend before delivering it to the client.
 .TP
+.B clientRequests400
+Client requests received, subject to 400 errors.
+.TP
+.B clientRequests411
+Client requests received, subject to 411 errors.  This variable is
+available only in Varnish version \fR4.0\fR.
+.TP
+.B clientRequests413
+Client requests received, subject to 413 errors.  This variable is
+available only in Varnish version \fR4.0\fR.
+.TP
 .B clientBan
 A write-only OID.  When set, invalidates the cache using the supplied
 value as argument to ban.  When read, returns an empty string.  E.g.,
@@ -128,7 +148,8 @@ the pool of connections.  It has not yet been used, but it might be,
 unless the backend closes it.
 .TP
 .B backendConnUnused
-Number of unused backend connections.
+Number of unused backend connections.  This variable is available only
+in Varnish version \fR4.0\fR.
 .TP
 .B backendConnRetry
 Backend connections retried.
@@ -237,7 +258,7 @@ Number of sessions dropped because session queue was full.
 Number of sessions closed.
 .TP
 .B sessPipeline
-Session pipeline.
+Session pipeline.  This variable is available only in Varnish version \fR4.0\fR.
 .TP
 .B sessReadAhead
 Session read-ahead.
@@ -252,7 +273,8 @@ Number of sessions dropped for thread.
 Number of session accept failures.
 .TP
 .B sessPipeOverflow
-Number of session pipe overflows.
+Number of session pipe overflows.  This variable is available only in
+Varnish version \fR4.0\fR.
 .SS Branch \(dqthreads\(dq
 .TP
 .B threadsPools
@@ -357,7 +379,7 @@ Sergey Poznyakoff
 .SH "BUG REPORTS"
 Report bugs to <gray@gnu.org>.
 .SH COPYRIGHT
-Copyright \(co 2014 Sergey Poznyakoff
+Copyright \(co 2014-2016 Sergey Poznyakoff
 .br
 .na
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>

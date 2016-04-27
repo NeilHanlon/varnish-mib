@@ -1,5 +1,5 @@
 # This file is part of Varnish-mib -*- autoconf -*-
-# Copyright (C) 2014-2015 Sergey Poznyakoff
+# Copyright (C) 2014-2016 Sergey Poznyakoff
 #
 # Varnish-mib is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 # along with Varnish-mib.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ(2.69)
-AC_INIT([varnish-mib], 1.1, [gray@gnu.org])
+AC_INIT([varnish-mib], 1.1.90, [gray@gnu.org])
 AC_CONFIG_SRCDIR(src/varnish_mib.mib2c)
 AM_CONFIG_HEADER(config.h)
 AC_CONFIG_AUX_DIR([build-aux])
@@ -42,6 +42,22 @@ PKG_PROG_PKG_CONFIG
 
 # Checks for Varnish
 PKG_CHECK_MODULES([VARNISHAPI], [varnishapi >= 4.0])
+
+varnishapi_version() {
+    AC_DEFINE_UNQUOTED([VARNISHAPI_MAJOR],[$1],[Varnish API major version number])
+    AC_DEFINE_UNQUOTED([VARNISHAPI_MINOR],[$2],[Varnish API minor version number])
+    AC_DEFINE_UNQUOTED([VARNISHAPI_PATCH],[$3],[Varnish API patchlevel])
+}
+
+v=$($PKG_CONFIG --modversion varnishapi)
+if test -n "$v"; then
+    save_IFS=$IFS
+    IFS='.'
+    varnishapi_version $v
+    IFS=$save_IFS
+fi
+
+AC_CHECK_VSC_C_MAIN_MEMBERS
 
 # Check for Net-SNMP
 AC_PATH_PROG([NET_SNMP_CONFIG], net-snmp-config, none, $PATH)

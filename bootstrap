@@ -1,7 +1,77 @@
-#!/bin/sh
-for dir in m4 build-aux
-do
-	test -d $dir || mkdir $dir
-done
-> ChangeLog
-autoreconf -f -i -s
+#!/usr/bin/perl
+use strict;
+use autodie;
+
+my $mib2c_config = 'src/varnish_mib.mib2c';
+
+die "This file must be run from the varnish-mib top level source directory"
+    unless -r $mib2c_config;
+
+print "$0: creating ancillary directories and files\n";
+foreach my $dir ('m4', 'build-aux') {
+    mkdir($dir) unless -d $dir;
+}
+
+unless (-f 'ChangeLog') {
+    open(my $fd, '>', 'ChangeLog');
+    print $fd <<EOT
+This file is a placeholder.  It will be filled with actual data by the first
+run of make.
+EOT
+;
+    close $fd;
+}
+
+print "$0: generating m4/varnish_mib.m4\n";
+open(my $fd, '<', $mib2c_config);
+my $prog;
+while (<$fd>) {
+    if (defined($prog)) {
+	last if /^\@endperl\@/;
+	$prog .= $_;
+    } else {
+	if (/^\@startperl\@/) {
+	    $prog = "no strict \"vars\";\n";
+	}
+    }
+}
+
+my %vars;
+eval $prog;
+die $@ if $@;
+die "$mib2c_config does not declare translation table"
+    unless exists $vars{'varnish_translate_table'};
+
+open(my $fd, '>', 'm4/varnish_mib.m4');
+print $fd <<'EOT';
+AC_DEFUN([AC_CHECK_VSC_C_MAIN_MEMBERS],
+[save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS $VARNISHAPI_CFLAGS"
+EOT
+;
+
+foreach my $member (sort
+		     map { $_->[1] }
+		      grep { $_->[0] eq 'MAIN' }
+		       values %{$vars{'varnish_translate_table'}}) {
+    print $fd <<EOT
+  AC_CHECK_MEMBERS([struct VSC_C_main.$member],,,
+[#include <stddef.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <limits.h>
+#include <vapi/vsc.h>
+#include <vapi/vsm.h>
+#include <vcli.h>])
+EOT
+;
+}
+print $fd <<'EOT'
+CFLAGS="$save_CFLAGS"
+])    
+EOT
+;    
+close $fd;
+
+print "$0: reconfiguring\n";
+exec('autoreconf -f -i -s');

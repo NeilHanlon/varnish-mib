@@ -439,7 +439,7 @@ vcli_connect(struct VSM_data *vd, struct vcli_conn *conn)
                 snmp_log(LOG_ERR, "no -T arg in shared memory\n");
                 return SNMP_ERR_GENERR;
         }
-	DEBUGMSGTL(("varnish_mib:vcli", "-T '%s'\n", vt.b));
+	DEBUGMSGTL(("varnish_mib:vcli", "-T '%s'\n", (char*) vt.b));
 	
 	s = strdup(vt.b);
 	if (!s) {
@@ -489,7 +489,7 @@ vcli_connect(struct VSM_data *vd, struct vcli_conn *conn)
                 snmp_log(LOG_ERR, "no -S arg in shared memory\n");
                 return SNMP_ERR_GENERR;
         }
-	DEBUGMSGTL(("varnish_mib:vcli", "-S '%s'\n", vt.b));
+	DEBUGMSGTL(("varnish_mib:vcli", "-S '%s'\n", (char*) vt.b));
 	s = strdup(vt.b);
 	if (!s) {
                 snmp_log(LOG_ERR, "out of memory\n");
